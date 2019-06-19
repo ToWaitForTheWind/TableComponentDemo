@@ -16,6 +16,7 @@
 import tableMixins from '../components/tableMixins'
 import TableComponent from '../components/TableComponent'
 import { delay } from 'q'
+import { testGet1 } from '@/api/index'
 export default {
   name: 'home',
   mixins: [ tableMixins ],
@@ -75,6 +76,13 @@ export default {
     this.toSetTdata()
   },
   methods: {
+    async toTestApi () {
+      let res = {}
+      res = await testGet1({id: 1})
+      if (res) {
+        console.log(res)
+      }
+    },
     async toSetTdata (params) {
       let that = this
       let res = {}
