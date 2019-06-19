@@ -17,6 +17,7 @@ import tableMixins from '../components/tableMixins'
 import TableComponent from '../components/TableComponent'
 import { delay } from 'q'
 import { testGet1 } from '@/api/index'
+import { mapGetters } from 'vuex'
 export default {
   name: 'home',
   mixins: [ tableMixins ],
@@ -48,6 +49,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters([ 'ISLOGIN' ]),
     operateConfig () {
       return {
         optType: {
@@ -74,6 +76,10 @@ export default {
   },
   created () {
     this.toSetTdata()
+    this.toTestApi()
+  },
+  mounted () {
+    console.log(this.ISLOGIN, '测试vuex状态')
   },
   methods: {
     async toTestApi () {

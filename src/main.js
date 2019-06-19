@@ -5,7 +5,7 @@ import ElementUI from 'element-ui'
 import './styles.scss'
 
 import formatFn from '@/utils/format'
-import store from './store'
+import store from './store/index'
 
 Vue.use(ElementUI)
   .use(formatFn)

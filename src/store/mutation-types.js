@@ -1,0 +1,3 @@
+// user模块
+export const MUTATION_SIGN_IN = 'MUTATION_SIGN_IN'
+export const MUTATION_SIGN_OUT = 'MUTATION_SIGN_OUT'
