@@ -2,13 +2,16 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import ElementUI from 'element-ui'
-import './styles.scss'
+import store from './store/index'
 
 import formatFn from '@/utils/format'
-import store from './store/index'
+import luckyUI from '@/luckyUI/index'
+
+import './styles.scss'
 
 Vue.use(ElementUI)
   .use(formatFn)
+  .use(luckyUI)
 
 Vue.config.productionTip = false
 
