@@ -207,12 +207,18 @@ export default {
     }
     &.is-plain {
       color: #1c92ff;
-      background: #ecf5ff;
-      border-color: #7dc1ff;
+      background: #e8f8ff;
+      border-color: #96ccff;
       &:hover {
         background: #1c92ff;
         border-color: #1c92ff;
         color: #ffffff;
+      }
+      &.is-disabled {
+        background: #e8f8ff;
+        border-color: #b1d8fc;
+        color: #70baff;
+        cursor: not-allowed;
       }
     }
   }
@@ -238,6 +244,12 @@ export default {
         border-color: #faad14;
         color: #ffffff;
       }
+      &.is-disabled {
+        background: #fffbe6;
+        border-color: #ffedb0;
+        color: #ffcd69;
+        cursor: not-allowed;
+      }
     }
   }
   &.success-lucky-button {
@@ -262,6 +274,12 @@ export default {
         border-color: #67c23a;
         color: #ffffff;
       }
+      &.is-disabled {
+        background: #f6ffed;
+        border-color: #d1f5b5;
+        color: #a4da89;
+        cursor: not-allowed;
+      }
     }
   }
   &.danger-lucky-button {
@@ -285,6 +303,12 @@ export default {
         background: #f55353;
         border-color: #f55353;
         color: #ffffff;
+      }
+      &.is-disabled {
+        background: #fef0f0;
+        border-color: #fde2e2;
+        color: #faa7a7;
+        cursor: not-allowed;
       }
     }
   }
