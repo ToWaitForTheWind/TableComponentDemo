@@ -11,7 +11,7 @@
     debounce: Boolean, 是否启用防抖
 */
 <template>
-  <button class="lucky-button" :class="activeClass" @click="emitClick">
+  <button class="lucky-button" type="button" :class="activeClass" @click="emitClick">
     <span class="inline-text">
       <slot></slot>
     </span>
