@@ -1,3 +1,37 @@
+.lucky-message {
+  min-width: 360px;
+  border-radius: 4px;
+  box-sizing: border-box;
+  padding: 10px 16px;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.15);
+  .iconfont {
+    height: 18px;
+    font-size: 16px;
+    line-height: 18px;
+    margin-right: 16px;
+  }
+  .el-message__content {
+    height: 18px;
+    font-size: 13px;
+    line-height: 18px;
+  }
+  &.lucky-primary-message {
+    color: #1c92ff;
+    background: #e8f4ff;
+  }
+  &.lucky-warning-message {
+    color: #faad14;
+    background: #fef6e7;
+  }
+  &.lucky-success-message {
+    color: #67c23a;
+    background: #f0f9eb;
+  }
+  &.lucky-danger-message {
+    color: #f55353;
+    background: #feeeee;
+  }
+}
 .el-date-editor {
   color: #c0c1cc;
   overflow: hidden;
@@ -97,6 +131,9 @@
         color: #5a5b5f;
         line-height: 28px;
       }
+      .el-range-input {
+        width: 75px;
+      }
     }
     &.el-range-editor--large {
       &.el-input__inner {
@@ -138,6 +175,9 @@
   &.el-date-editor--daterange {
     &.el-input__inner {
       width: 250px;
+      .el-range-input {
+        width: 75px;
+      }
     }
   }
   &.el-date-editor--datetimerange {
