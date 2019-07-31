@@ -6,6 +6,9 @@ $--font-path: '~element-ui/lib/theme-chalk/fonts';
 
 @import '~element-ui/packages/theme-chalk/src/index';
 
+body {
+  margin: 0;
+}
 .status-tag {
   font-size: 12px;
   line-height: 17px;
