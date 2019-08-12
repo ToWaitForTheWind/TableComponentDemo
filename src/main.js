@@ -7,7 +7,6 @@ import store from './store/index'
 import formatFn from '@/utils/format'
 import luckyUI from '@/luckyUI/index'
 
-import './luckyUI/assets/commom.scss'
 import './styles.scss'
 
 Vue.use(ElementUI)

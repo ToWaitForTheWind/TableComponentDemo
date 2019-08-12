@@ -1,6 +1,6 @@
 <template>
   <div>
-    <lucky-content-layout :projectName="'项目名称'"></lucky-content-layout>
+    <lucky-special-input v-model="value1" size="small" :valueLimit="valueLimit"></lucky-special-input>
   </div>
 </template>
 
@@ -11,11 +11,16 @@ export default {
   data () {
     return {
       test: false,
-      value1: ''
+      value1: 'aaaa',
+      valueLimit: '0123456789a'
     }
   },
   computed: {},
-  watch: {},
+  watch: {
+    value1: (val) => {
+      // console.log(val)
+    }
+  },
   created () {},
   mounted () {
     // this.luckyMessage()
