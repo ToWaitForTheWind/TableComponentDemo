@@ -1,9 +1,12 @@
 <template>
-  <div class="lucky-special-input">
+  <div class="lucky-special-input clearfix" :class="[ $slots.prepend  ? 'show-prepend' : '', activeClass ]">
+    <div class="lucky-prepend" v-if="$slots.prepend">
+      <slot name="prepend"></slot>
+    </div>
     <input
       ref="luckyInput"
       class="lucky-input"
-      :class="activeClass"
+      :class="{ 'prepend-input': $slots.prepend }"
       type="text"
       :maxlength="maxlength"
       :placeholder="placeholder"
@@ -39,7 +42,7 @@ export default {
     },
     activeClass () {
       let activeClass = ''
-      if (this.sizeClass !== '') activeClass = `${activeClass} ${this.sizeClass}`
+      if (this.sizeClass !== '') activeClass = this.sizeClass
       if (this.disabledClass !== '') activeClass = `${activeClass} ${this.disabledClass}`
       return activeClass
     },
@@ -67,20 +70,19 @@ export default {
   watch: {
     'trueInputValue' (newVal, oldVal) {
       let that = this
-      if (newVal.length > oldVal.length) {
-        let reg = new RegExp(oldVal)
-        let inputValue = newVal.replace(reg, '')
-        let inputValueArr = inputValue.split('')
-        let valueStr = ''
-        inputValueArr.forEach(item => {
-          if (that.valueLimit.indexOf(item) !== -1) {
-            valueStr += item
-          }
-        })
-        that.$emit('input', oldVal + valueStr)
-        that.trueInputValue = oldVal + valueStr
-        that.$refs['luckyInput'].value = oldVal + valueStr
-      }
+      let inputValueArr = newVal.split('')
+      let valueStr = ''
+      inputValueArr.forEach(item => {
+        if (that.valueLimit.indexOf(item) !== -1) {
+          valueStr += item
+        }
+      })
+      that.$emit('input', valueStr)
+      that.trueInputValue = valueStr
+      that.$refs['luckyInput'].value = valueStr
+    },
+    'value' () {
+      this.setNativeInputValue()
     }
   },
   created () {},
@@ -89,14 +91,11 @@ export default {
   },
   methods: {
     handleInput (event) {
-      // console.log(event.target.value, 'handleInput')
-      // this.trueInputValue = event.target.value
-      // this.$nextTick(this.setNativeInputValue)
     },
     handleBlur(event) {
       this.$emit('blur', event)
       if (this.validateEvent) {
-        // this.dispatch('ElFormItem', 'el.form.blur', [this.trueInputValue])
+        this.dispatch('ElFormItem', 'el.form.blur', [this.trueInputValue])
       }
     },
     handleFocus(event) {
@@ -111,6 +110,16 @@ export default {
       if (!input) return
       input.value = this.value
       this.trueInputValue = this.value
+    },
+    dispatch (componentName, eventName, params) {
+      var parent = this.$parent || this.$root;
+      var name = parent.$options.componentName;
+
+      while (parent && (!name || name !== componentName)) {
+        parent = parent.$parent;
+        if (parent) name = parent.$options.componentName;
+      }
+      if (parent) parent.$emit.apply(parent, [eventName].concat(params));
     }
   }
 }
@@ -118,6 +127,80 @@ export default {
 
 <style lang="scss">
 .lucky-special-input {
+  display: inline-block;
+  width: 248px;
+  height: 36px;
+  font: 14px "Microsoft Yahei";
+  &.large-lucky-input {
+    height: 40px;
+    .lucky-input {
+      padding: 10px 12px;
+    }
+    .lucky-prepend {
+      padding: 10px 12px;
+    }
+  }
+  &.small-lucky-input {
+    height: 28px;
+    font-size: 12px;
+    .lucky-input {
+      line-height: 18px;
+      padding: 5px 12px;
+    }
+    .lucky-prepend {
+      line-height: 18px;
+      padding: 5px 12px;
+    }
+  }
+  &.is-disabled {
+    cursor: not-allowed;
+    .lucky-input {
+      background: #f7fafc;
+      border: 1px solid rgba(220, 222, 230, 0.9);
+    }
+    .lucky-prepend {
+      border: 1px solid rgba(220, 222, 230, 0.9);
+      border-right: 0;
+    }
+  }
+  &.show-prepend {
+    display: inline-table;
+    .lucky-input {
+      display: table-cell;
+      vertical-align: middle;
+    }
+  }
+  .lucky-prepend {
+    display: table-cell;
+    vertical-align: middle;
+    padding: 8px 12px;
+    line-height: 20px;
+    border-radius: 4px 0 0 4px;
+    border: 1px solid #dcdee6;
+    border-right: 0;
+    background: #f5f7fa;
+    color: #909399;
+    width: 1px;
+    white-space: nowrap;
+  }
+  .lucky-input {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid #dcdee6;
+    border-radius: 4px;
+    padding: 8px 12px;
+    color: #5a5b5f;
+    line-height: 20px;
+    box-sizing: border-box;
+    outline: none;
+    &:hover,
+    &:focus {
+      border-color: #1c92ff;
+    }
+    &.prepend-input {
+      border-radius: 0 4px 4px 0;
+    }
+  }
   ::-webkit-input-placeholder {
     color: #c0c1cc;
   }
@@ -130,37 +213,8 @@ export default {
   :-moz-placeholder {
     color: #c0c1cc;
   }
-  .lucky-input {
-    width: 248px;
-    height: 36px;
-    background: #ffffff;
-    border: 1px solid #dcdee6;
-    border-radius: 4px;
-    font: 14px "Microsoft Yahei";
-    padding: 8px 12px;
-    color: #5a5b5f;
-    line-height: 20px;
-    box-sizing: border-box;
-    outline: none;
-    &:hover,
-    &:focus {
-      border-color: #1c92ff;
-    }
-    &.large-lucky-input {
-      height: 40px;
-      padding: 10px 12px;
-    }
-    &.small-lucky-input {
-      height: 28px;
-      font-size: 12px;
-      line-height: 18px;
-      padding: 5px 12px;
-    }
-    &.is-disabled {
-      background: #f7fafc;
-      border: 1px solid rgba(220, 222, 230, 0.9);
-      cursor: not-allowed;
-    }
-  }
+}
+.el-form-item.is-error .lucky-input {
+  border-color: #f55353;
 }
 </style>
