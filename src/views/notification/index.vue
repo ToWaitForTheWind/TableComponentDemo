@@ -1,6 +1,6 @@
 <template>
   <div>
-    <lucky-special-input v-model="value1" size="small" :valueLimit="valueLimit"></lucky-special-input>
+    <lucky-video></lucky-video>
   </div>
 </template>
 
