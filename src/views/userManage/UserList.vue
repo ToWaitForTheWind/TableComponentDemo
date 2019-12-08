@@ -13,8 +13,8 @@
 </template>
 
 <script>
-import tableMixins from '../components/tableMixins'
-import TableComponent from '../components/TableComponent'
+import tableMixins from '@/components/tableMixins'
+import TableComponent from '@/components/TableComponent'
 import { delay } from 'q'
 import { testGet1 } from '@/api/index'
 import { mapGetters } from 'vuex'

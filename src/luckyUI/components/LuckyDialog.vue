@@ -1,6 +1,6 @@
 /**
 * 版本号：v1.0
-* 创建人：林浩
+* 创建人：zoom
 * 创建时间：2019/07/15
 * 描述：
     visible  是否显示Dialog，需使用.sync修饰符  boolean  默认：false

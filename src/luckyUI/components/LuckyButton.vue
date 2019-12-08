@@ -1,6 +1,6 @@
 /**
 * 版本号：v1.0
-* 创建人：林浩
+* 创建人：zoom
 * 创建时间：2019/07/24
 * 描述：
     type: String, 按钮类型（默认, text, primary, warning, success, danger）
