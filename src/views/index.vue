@@ -9,29 +9,31 @@
           background-color="#545c64"
           text-color="#fff"
           active-text-color="#ffd04b"
+          unique-opened
+          ref="sideBar"
+          @select="handleSelect"
         >
-          <el-submenu index="1">
-            <template slot="title">
-              <i class="el-icon-location"></i>
-              <span>导航一</span>
-            </template>
-            <el-submenu index="1-4">
-              <template slot="title">选项4</template>
-              <el-menu-item index="1-4-1">选项1</el-menu-item>
+          <template v-for="(item, index) in currentMenuList">
+            <el-submenu v-if="item.hasOwnProperty('children') && item.children.length > 0" :key="index" :index="item.name">
+              <template slot="title">
+                <i :class="item.icon"></i>
+                <span>{{ item.desc }}</span>
+              </template>
+              <template v-for="(secondItem, secondIndex) in item.children">
+                <el-submenu v-if="secondItem.hasOwnProperty('children') && secondItem.children.length > 0" :key="secondIndex" :index="secondItem.name">
+                  <template slot="title">{{ secondItem.desc }}</template>
+                  <el-menu-item v-for="(thirdItem, thirdIndex) in secondItem.children" :key="thirdIndex" :index="thirdItem.name">{{ thirdItem.desc }}</el-menu-item>
+                </el-submenu>
+                <el-menu-item v-else :key="secondIndex" :index="secondItem.name">{{ secondItem.desc }}</el-menu-item>
+              </template>
             </el-submenu>
-          </el-submenu>
-          <el-menu-item index="2">
-            <i class="el-icon-menu"></i>
-            <span slot="title">导航二</span>
-          </el-menu-item>
-          <el-menu-item index="3" disabled>
-            <i class="el-icon-document"></i>
-            <span slot="title">导航三</span>
-          </el-menu-item>
-          <el-menu-item index="4">
-            <i class="el-icon-setting"></i>
-            <span slot="title">导航四</span>
-          </el-menu-item>
+            <el-menu-item v-else :key="index" :index="item.name">
+              <template slot="title">
+                <i :class="item.icon"></i>
+                <span>{{ item.desc }}</span>
+              </template>
+            </el-menu-item>
+          </template>
         </el-menu>
       </aside>
       <div class="right_content">
@@ -42,23 +44,40 @@
 </template>
 
 <script>
-import { adminPlatformMenu } from '@/config/menuConfig'
+import { adminPlatformMenu, toFilterHavePermissionMenu } from '@/config/menuConfig'
 export default {
   components: {},
   props: {},
   data() {
-    return {
-    }
+    return {}
   },
   computed: {
-    defaultActive () {
-      return ''
+    currentPath() {
+      return this.$route.path
+    },
+    defaultActive() {
+      let currentName = this.$route.name
+      let nameArr = currentName.split('_')
+      if (nameArr.length > 2) return nameArr[0] + '_' + nameArr[1]
+      else return currentName
+    },
+    currentMenuList() {
+      let currentPath = this.currentPath
+      if (currentPath.indexOf('admin') !== -1) return toFilterHavePermissionMenu(adminPlatformMenu, this.authList)
+      else return []
+    },
+    authList() {
+      return {}
     }
   },
   watch: {},
   created() {},
   mounted() {},
-  methods: {}
+  methods: {
+    handleSelect(key, keyPath) {
+      this.$router.push({ name: key })
+    }
+  }
 }
 </script>
 
@@ -74,8 +93,14 @@ export default {
   .home_content {
     height: calc(100vh - 60px);
     min-height: 800px;
+    display: flex;
     .left_menu {
       width: 200px;
+    }
+    .right_content {
+      width: calc(100% - 200px);
+      padding: 20px;
+      box-sizing: border-box;
     }
   }
 }

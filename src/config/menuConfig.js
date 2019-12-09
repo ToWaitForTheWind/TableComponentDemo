@@ -47,3 +47,23 @@ export const adminPlatformMenu = [
     ]
   }
 ]
+
+export const toFilterHavePermissionMenu = function (menuList = [], authList = {}) {
+  let newMenu = []
+  menuList.forEach(item => {
+    if (item.hasOwnProperty('children')) {
+      let returnArr = toFilterHavePermissionMenu(item.children, authList)
+      returnArr.length > 0 && newMenu.push({ ...item, children: returnArr })
+    } else authList[item.name] && newMenu.push(item)
+  })
+  return newMenu
+}
+
+export const toFindNextRedirectRouter = function (hasPermissionMenu = []) {
+  if (hasPermissionMenu.length > 0) {
+    for (let item of hasPermissionMenu) {
+      if (item.hasOwnProperty('children')) return toFindNextRedirectRouter(item.children)
+      else return item
+    }
+  }
+}
