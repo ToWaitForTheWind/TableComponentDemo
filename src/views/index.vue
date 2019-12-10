@@ -45,6 +45,7 @@
 
 <script>
 import { adminPlatformMenu, toFilterHavePermissionMenu } from '@/config/menuConfig'
+import { authList } from '@/config/authConfig'
 export default {
   components: {},
   props: {},
@@ -67,7 +68,8 @@ export default {
       else return []
     },
     authList() {
-      return {}
+      // 假装从用户信息中获取
+      return authList
     }
   },
   watch: {},
@@ -96,11 +98,16 @@ export default {
     display: flex;
     .left_menu {
       width: 200px;
+      background: #545c64;
+      .el-menu {
+        border-right: 0;
+      }
     }
     .right_content {
       width: calc(100% - 200px);
       padding: 20px;
       box-sizing: border-box;
+      overflow: auto;
     }
   }
 }
