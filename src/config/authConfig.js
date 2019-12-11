@@ -2,7 +2,7 @@
 export const authList = {
   admin_main: true,
   admin_user: true,
-  admin_user_add: true,
+  admin_user_add: false,
   admin_user_edit: true,
   admin_user_department_filter: true,
   admin_user_multidel: true,

@@ -9,6 +9,8 @@ import luckyUI from '@/luckyUI/index'
 
 import './styles.scss'
 
+import { authList } from '@/config/authConfig'
+
 Vue.use(ElementUI)
   .use(formatFn)
   .use(luckyUI)
