@@ -2,6 +2,8 @@
   <div class="home">
     <TableComponent
       :loading="loading"
+      codetype="aaaa"
+      codeTcp="bbb"
       :tableConfig="tableConfig"
       :tableData="tableData"
       @toAdd="toAdd"

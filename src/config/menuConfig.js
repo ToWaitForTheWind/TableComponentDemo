@@ -45,6 +45,10 @@ export const adminPlatformMenu = [
         ]
       }
     ]
+  }, {
+    name: 'admin_test', // 这一项有子菜单，所以这项index并不需要进行页面定向，其实可以随意写，但是是必填项
+    desc: '测试',
+    icon: 'el-icon-edit',
   }
 ]
 

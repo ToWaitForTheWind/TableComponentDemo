@@ -8,5 +8,6 @@ export const authList = {
   admin_user_multidel: true,
   admin_user_delete: true,
   admin_department: true,
-  admin_loophole: true
+  admin_loophole: true,
+  admin_test: true
 }
