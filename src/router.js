@@ -35,42 +35,48 @@ const routes = [
         meta: {
           requireAuth: true
         }
-      }, {
+      },
+      {
         path: 'userList',
         name: 'admin_user',
         component: UserList,
         meta: {
           requireAuth: true
         }
-      }, {
+      },
+      {
         path: 'userList/add',
         name: 'admin_user_add',
         component: UserOperate,
         meta: {
           requireAuth: true
         }
-      }, {
+      },
+      {
         path: 'userList/:id/edit',
         name: 'admin_user_edit',
         component: UserOperate,
         meta: {
           requireAuth: true
         }
-      }, {
+      },
+      {
         path: 'department',
         name: 'admin_department',
         component: DepartmentList,
         meta: {
           requireAuth: true
         }
-      }, {
+      },
+      {
         path: 'loophole',
         name: 'admin_loophole',
         component: LoopholeList,
         meta: {
           requireAuth: true
         }
-      }, {
+      },
+      {
         path: 'test',
         name: 'admin_test',
         component: test1,

@@ -1,28 +1,23 @@
 <template>
-  <div class="stretching-column">
-    <lucky-lazy-select v-model="testValue" :getOptionFunc="getOptionFunc" @change="handleChange"></lucky-lazy-select>
-    <lucky-button @click="toTest">test</lucky-button>
+  <div class="test1" v-loading="true" element-loading-spinner="lucky-loading">
   </div>
 </template>
 
 <script>
+
 export default {
-  data () {
-    return {
-      testValue: ''
-    }
+  data() {
+    return {}
   },
-  mounted () {},
-  mounted () {},
+  created() {},
+  mounted() {},
   methods: {
-    handleChange (val) {
-      console.log(val)
-    },
-    toTest () {
-      console.log(this.testValue)
-    },
-    getOptionFunc () {}
   }
 }
 </script>
-<style lang="scss"></style>
+<style lang="scss">
+.test1 {
+  widows: 400px;
+  height: 400px;
+}
+</style>
