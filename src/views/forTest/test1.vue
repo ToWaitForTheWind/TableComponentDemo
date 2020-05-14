@@ -1,18 +1,16 @@
 <template>
-  <div class="test1" v-loading="true" element-loading-spinner="lucky-loading">
+  <div class="test1" v-loading="true" element-loading-spinner="lucky-loading-2">
   </div>
 </template>
 
 <script>
-
 export default {
   data() {
     return {}
   },
   created() {},
   mounted() {},
-  methods: {
-  }
+  methods: {},
 }
 </script>
 <style lang="scss">

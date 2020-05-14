@@ -64,7 +64,7 @@ body {
   }
 }
 
-.lucky-loading {
+.lucky-loading-1 {
   background: #1962ff;
   animation: LuckyLoading 1s ease-in-out infinite;
   animation-delay: 0.4s;
@@ -93,12 +93,48 @@ body {
     animation-delay: 0.6s;
   }
 }
-@keyframes LuckyLoading {
+@keyframes LuckyLoading1 {
   0%,
   100% {
     box-shadow: 0 0 0 #1962ff, 0 0 0 #1962ff;
   }
   50% {
     box-shadow: 0 -25px 0 #1962ff, 0 25px 0 #1962ff;
+  }
+}
+
+.lucky-loading-2 {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  &:before,
+  &:after {
+    content: '';
+    display: block;
+    position: absolute;
+    background-color: #6d8dff;
+    left: 50%;
+    right: 0;
+    top: 0;
+    bottom: 50%;
+    box-shadow: -20px 0 0 #6d8dff;
+    animation: LuckyLoading2 2s linear infinite;
+  }
+  &:after {
+    top: 50%;
+    bottom: 0;
+    animation-delay: 0.5s;
+  }
+}
+@keyframes LuckyLoading2 {
+  0%,
+  100% {
+    box-shadow: -20px 0 0 #40518a;
+    background-color: #6d8dff;
+  }
+  50% {
+    box-shadow: -20px 0 0 #6d8dff;
+    background-color: #40518a;
   }
 }
