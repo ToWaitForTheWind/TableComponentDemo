@@ -9,6 +9,7 @@ import LuckySpecialInput from './components/LuckySpecialInput'
 import LuckyMainLayout from './components/LuckyMainLayout'
 import LuckyContentLayout from './components/LuckyContentLayout'
 import LuckyLazySelect from './components/LuckyLazySelect'
+import LuckyRuleInput from './components/LuckyRuleInput'
 import './assets/commom.scss'
 
 export default {
@@ -24,5 +25,6 @@ export default {
     Vue.component('LuckyImageUpload', LuckyImageUpload)
     Vue.component('LuckySpecialInput', LuckySpecialInput)
     Vue.component('LuckyLazySelect', LuckyLazySelect)
+    Vue.component('LuckyRuleInput', LuckyRuleInput)
   }
 }

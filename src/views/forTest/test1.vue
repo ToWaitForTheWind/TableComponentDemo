@@ -1,16 +1,31 @@
 <template>
-  <div class="test1" v-loading="true" element-loading-spinner="lucky-loading-2">
-  </div>
+  <LuckyRuleInput v-model="value" limitType="custom" :limitValue="formatFunc" size="small"></LuckyRuleInput>
 </template>
 
 <script>
 export default {
   data() {
-    return {}
+    return {
+      value: ''
+    }
+  },
+  watch: {
+    value (val) {
+      console.log(val)
+    }
   },
   created() {},
   mounted() {},
-  methods: {},
+  methods: {
+    formatFunc (aaa) {
+      let valArr = aaa.split('')
+      let resStr = ''
+      valArr.forEach(item => {
+        if (item !== 'a') resStr += item
+      })
+      return resStr
+    }
+  },
 }
 </script>
 <style lang="scss">
