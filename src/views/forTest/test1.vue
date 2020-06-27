@@ -10,22 +10,22 @@ export default {
     }
   },
   watch: {
-    value (val) {
+    value(val) {
       console.log(val)
     }
   },
   created() {},
   mounted() {},
   methods: {
-    formatFunc (aaa) {
+    formatFunc(aaa) {
       let valArr = aaa.split('')
       let resStr = ''
-      valArr.forEach(item => {
+      valArr.forEach((item) => {
         if (item !== 'a') resStr += item
       })
       return resStr
     }
-  },
+  }
 }
 </script>
 <style lang="scss">

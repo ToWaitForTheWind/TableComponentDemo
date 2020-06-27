@@ -1,5 +1,8 @@
 <template>
-  <div class="lucky-rule-input clearfix" :class="[$slots.prepend ? 'show-prepend' : '', activeClass]">
+  <div
+    class="lucky-rule-input clearfix"
+    :class="[$slots.prepend ? 'show-prepend' : '', activeClass]"
+  >
     <div class="lucky-prepend" v-if="$slots.prepend">
       <slot name="prepend"></slot>
     </div>
@@ -150,7 +153,7 @@ export default {
   display: inline-block;
   width: 248px;
   height: 36px;
-  font: 14px 'Microsoft Yahei';
+  font: 14px "Microsoft Yahei";
   &.large-lucky-input {
     height: 40px;
     .lucky-input {

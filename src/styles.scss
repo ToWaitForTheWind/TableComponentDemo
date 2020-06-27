@@ -34,6 +34,9 @@ body {
     border: 1px solid rgba(230, 162, 60, 0.2);
   }
   &.danger {
+    color: #e63c3c;
+    background: rgba(230, 162, 60, 0.1);
+    border: 1px solid rgba(230, 162, 60, 0.2);
   }
 }
 
