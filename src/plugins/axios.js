@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 // 设置baseURL，判断当前环境是否为生产环境，若不是需设置自己的apiURL
-let baseURL = process.env.NODE_ENV !== 'production' ? 'http://balabala/' : '/'
+let baseURL = process.env.NODE_ENV !== 'production' ? 'http://csra.adl.io/' : '/'
 let config = {
   baseURL,
   timeout: 60 * 1000 // 请求超时时间
@@ -14,6 +14,7 @@ _axios.interceptors.request.use(
   function (config) {
     // Do something before request is sent
     console.log(config)
+    config.headers.authorization = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC91c2VyXC9yYW5nZS11c2VyXC9hcGlcL2xvZ2luIiwiaWF0IjoxNTkzNTcwOTEzLCJleHAiOjE1OTM3ODY5MTMsIm5iZiI6MTU5MzU3MDkxMywianRpIjoiTmRyQWRXd1lqOXZtWGhXSCIsInN1YiI6NSwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyIsImxvZ2luX3Rva2VuIjoiMmJlZTg4YTFmNDAxOThkNjdiZjViYjE5M2I2OTY3YmUiLCJndWFyZCI6InVzZXIifQ.FWqvo45bf_FKN0eTZ3MlBST43OhRNCoA1PIjXcXyfGc'
     return config
   },
   function (error) {
@@ -28,7 +29,7 @@ _axios.interceptors.response.use(
   function (response) {
     // Do something with response data
     console.log(response)
-    return response
+    return response.data
   },
   function (error) {
     // Do something with response error
