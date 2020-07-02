@@ -45,15 +45,22 @@ export default {
 .test_draggable {
   .left {
     width: 50%;
-    min-height: 400px;
     float: left;
+    border: 1px solid #48494d;
+    box-sizing: border-box;
+    padding: 20px;
+    .source_group {
+      min-height: 400px;
+    }
   }
   .right {
     width: 50%;
-    min-height: 400px;
     float: right;
+    border: 1px solid #48494d;
+    box-sizing: border-box;
+    padding: 20px;
     .target_group {
-      height: 400px;
+      min-height: 400px;
     }
   }
   .item {
