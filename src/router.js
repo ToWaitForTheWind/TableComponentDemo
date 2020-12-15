@@ -11,7 +11,7 @@ const UserOperate = () => import('@/views/userManage/UserOperate')
 const LoopholeList = () => import('@/views/loophole/LoopholeList')
 const DepartmentList = () => import('@/views/department/DepartmentList')
 const NoAuth = () => import('@/views/common/NoAuth')
-const test1 = () => import('@/views/forTest/TestGetServeTime')
+const test1 = () => import('@/views/forTest/TestScore')
 
 Vue.use(Router)
 
