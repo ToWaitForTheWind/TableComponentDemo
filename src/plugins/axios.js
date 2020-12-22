@@ -9,11 +9,23 @@ let config = {
 
 const _axios = axios.create(config)
 
+let pendingQueue = new Map()
+let CancelToken = axios.CancelToken
 // http request 拦截器
 _axios.interceptors.request.use(
   function (config) {
     // Do something before request is sent
-    console.log(config)
+    // 请求发起之前先检验该请求是否在队列中，如果在就把队列中pending的请求cancel掉
+    judgePendingFunc(config)
+    // 将pending队列中的请求设置为当前
+    config.cancelToken = new CancelToken(cb => {
+      pendingQueue.set(`${config.method}->${config.url}`, cb)
+    })
+    if (config.method === 'get') {
+      let res = handleGetUrl(config.url, config.params)
+      config.url = res.url
+      config.params = res.params
+    }
     config.headers.authorization = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC91c2VyXC9yYW5nZS11c2VyXC9hcGlcL2xvZ2luIiwiaWF0IjoxNTkzNTcwOTEzLCJleHAiOjE1OTM3ODY5MTMsIm5iZiI6MTU5MzU3MDkxMywianRpIjoiTmRyQWRXd1lqOXZtWGhXSCIsInN1YiI6NSwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyIsImxvZ2luX3Rva2VuIjoiMmJlZTg4YTFmNDAxOThkNjdiZjViYjE5M2I2OTY3YmUiLCJndWFyZCI6InVzZXIifQ.FWqvo45bf_FKN0eTZ3MlBST43OhRNCoA1PIjXcXyfGc'
     return config
   },
@@ -28,6 +40,7 @@ _axios.interceptors.request.use(
 _axios.interceptors.response.use(
   function (response) {
     // Do something with response data
+    removeResolvedFunc(response.config)
     console.log(response)
     return response.data
   },
@@ -76,6 +89,40 @@ const deleteFn = async (url, data) => {
 // 捕获请求错误
 function handleError(error) {
   Promise.reject(error)
+}
+// 判断请求是否在队列中，如果在就执行取消请求
+const judgePendingFunc = function (config) {
+  if (pendingQueue.has(`${config.method}->${config.url}`)) {
+    pendingQueue.get(`${config.method}->${config.url}`)()
+  }
+}
+// 删除队列中对应已执行的请求
+const removeResolvedFunc = function (config) {
+  if (pendingQueue.has(`${config.method}->${config.url}`)) {
+    pendingQueue.delete(`${config.method}->${config.url}`)
+  }
+}
+// 处理get请求功能性字符和非功能性字符被转换导致的问题
+const handleGetUrl = function (url, params) {
+  let parts = []
+  let resUrl = url
+  let resParams = params
+  let keys = Object.keys(params)
+  for (let key of keys) {
+    let values = []
+    if (Array.isArray(params[key])) {
+      values = params[key]
+      key += '[]'
+    } else values = [params[key]]
+    values.forEach(val => {
+      if (val || val === 0) parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(val)}`)
+    })
+  }
+  let serializedParams = parts.join('&')
+  if (serializedParams) {
+    resUrl += (resUrl.includes('?') ? '&' : '?') + serializedParams
+  }
+  return { url: resUrl, params: resParams }
 }
 
 export default {
