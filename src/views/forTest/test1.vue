@@ -1,8 +1,11 @@
 <template>
-  <div class=""></div>
+  <div class="test">
+    <el-button @click="toTest">测试请求取消功能</el-button>
+  </div>
 </template>
 
 <script>
+import { getUserList } from '@/api/test'
 export default {
   components: {},
   props: {},
@@ -13,7 +16,14 @@ export default {
   watch: {},
   created() {},
   mounted() {},
-  methods: {}
+  methods: {
+    async toTest() {
+      let res
+      res = await getUserList()
+      if (res) {
+      }
+    }
+  }
 }
 </script>
 

@@ -2,7 +2,11 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import entrance from './views/index'
 
-import { adminPlatformMenu, toFilterHavePermissionMenu, toFindNextRedirectRouter } from '@/config/menuConfig'
+import {
+  adminPlatformMenu,
+  toFilterHavePermissionMenu,
+  toFindNextRedirectRouter
+} from '@/config/menuConfig'
 import { authList } from '@/config/authConfig'
 
 const HomePage = () => import('@/views/home/HomePage')
@@ -11,7 +15,7 @@ const UserOperate = () => import('@/views/userManage/UserOperate')
 const LoopholeList = () => import('@/views/loophole/LoopholeList')
 const DepartmentList = () => import('@/views/department/DepartmentList')
 const NoAuth = () => import('@/views/common/NoAuth')
-const test1 = () => import('@/views/forTest/TestScore')
+const test1 = () => import('@/views/forTest/test1')
 
 Vue.use(Router)
 
@@ -25,7 +29,11 @@ const routes = [
     name: 'adminPlatForm',
     component: entrance,
     redirect: to => {
-      return { name: toFindNextRedirectRouter(toFilterHavePermissionMenu(adminPlatformMenu, authList)).name }
+      return {
+        name: toFindNextRedirectRouter(
+          toFilterHavePermissionMenu(adminPlatformMenu, authList)
+        ).name
+      }
     },
     children: [
       {
