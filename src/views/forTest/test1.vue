@@ -1,5 +1,5 @@
 <template>
-  <div class="test">
+  <div class="test" id="aaa">
     <el-button @click="toTest">测试请求取消功能</el-button>
   </div>
 </template>
@@ -19,7 +19,7 @@ export default {
   methods: {
     async toTest() {
       let res
-      res = await getUserList()
+      res = await getUserList({}, { loadingOptions: { target: '#aaa' } })
       if (res) {
       }
     }
