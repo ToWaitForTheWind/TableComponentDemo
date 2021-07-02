@@ -1,13 +1,30 @@
 <template>
   <div class="test_draggable">
-    <VueDraggable class="left" tag="div" v-model="sourceList" group="lucky" ghost-class="ghost" :move="onMove">
+    <VueDraggable
+      class="left"
+      tag="div"
+      v-model="sourceList"
+      group="lucky"
+      ghost-class="ghost"
+      :move="onMove"
+    >
       <transition-group tag="div" class="source_group" :name="'source_group'">
-        <div v-for="item in sourceList" :key="item.order" class="item">{{ `${item.order}_${item.name}` }}</div>
+        <div v-for="item in sourceList" :key="item.order" class="item">
+          {{ `${item.order}_${item.name}` }}
+        </div>
       </transition-group>
     </VueDraggable>
-    <VueDraggable class="right" v-model="targetList" group="lucky" ghost-class="ghost" :move="onMove">
+    <VueDraggable
+      class="right"
+      v-model="targetList"
+      group="lucky"
+      ghost-class="ghost"
+      :move="onMove"
+    >
       <transition-group tag="div" class="target_group" :name="'target_group'">
-        <div v-for="item in targetList" :key="item.order" class="item">{{ `${item.order}_${item.name}` }}</div>
+        <div v-for="item in targetList" :key="item.order" class="item">
+          {{ `${item.order}_${item.name}` }}
+        </div>
       </transition-group>
     </VueDraggable>
   </div>
