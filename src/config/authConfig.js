@@ -9,5 +9,6 @@ export const authList = {
   admin_user_delete: true,
   admin_department: true,
   admin_loophole: true,
+  admin_regexp: true,
   admin_test: true
 }
