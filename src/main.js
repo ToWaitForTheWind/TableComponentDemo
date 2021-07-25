@@ -19,7 +19,7 @@ Vue.use(ElementUI)
   .use(ViewUI)
 
 Vue.config.productionTip = false
-
+// aaa
 new Vue({
   router,
   store,
