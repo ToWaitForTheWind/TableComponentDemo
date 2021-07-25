@@ -19,11 +19,9 @@ Vue.use(ElementUI)
   .use(ViewUI)
 
 Vue.config.productionTip = false
-// aaa
+
 new Vue({
   router,
   store,
   render: h => h(App)
 }).$mount('#app')
-// 测试开始
-// 主分支第一次提交
