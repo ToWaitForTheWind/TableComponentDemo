@@ -14,17 +14,42 @@
           @select="handleSelect"
         >
           <template v-for="(item, index) in currentMenuList">
-            <el-submenu v-if="item.hasOwnProperty('children') && item.children.length > 0" :key="index" :index="item.name">
+            <el-submenu
+              v-if="item.hasOwnProperty('children') && item.children.length > 0"
+              :key="index"
+              :index="item.name"
+            >
               <template slot="title">
                 <i :class="item.icon"></i>
                 <span>{{ item.desc }}</span>
               </template>
               <template v-for="(secondItem, secondIndex) in item.children">
-                <el-submenu v-if="secondItem.hasOwnProperty('children') && secondItem.children.length > 0" :key="secondIndex" :index="secondItem.name">
-                  <template slot="title">{{ secondItem.desc }}</template>
-                  <el-menu-item v-for="(thirdItem, thirdIndex) in secondItem.children" :key="thirdIndex" :index="thirdItem.name">{{ thirdItem.desc }}</el-menu-item>
+                <el-submenu
+                  v-if="
+                    secondItem.hasOwnProperty('children') &&
+                      secondItem.children.length > 0
+                  "
+                  :key="secondIndex"
+                  :index="secondItem.name"
+                >
+                  <template slot="title">
+                    {{ secondItem.desc }}
+                  </template>
+                  <el-menu-item
+                    v-for="(thirdItem, thirdIndex) in secondItem.children"
+                    :key="thirdIndex"
+                    :index="thirdItem.name"
+                  >
+                    {{ thirdItem.desc }}
+                  </el-menu-item>
                 </el-submenu>
-                <el-menu-item v-else :key="secondIndex" :index="secondItem.name">{{ secondItem.desc }}</el-menu-item>
+                <el-menu-item
+                  v-else
+                  :key="secondIndex"
+                  :index="secondItem.name"
+                >
+                  {{ secondItem.desc }}
+                </el-menu-item>
               </template>
             </el-submenu>
             <el-menu-item v-else :key="index" :index="item.name">
@@ -44,7 +69,10 @@
 </template>
 
 <script>
-import { adminPlatformMenu, toFilterHavePermissionMenu } from '@/config/menuConfig'
+import {
+  adminPlatformMenu,
+  toFilterHavePermissionMenu
+} from '@/config/menuConfig'
 import { authList } from '@/config/authConfig'
 export default {
   components: {},
@@ -64,7 +92,8 @@ export default {
     },
     currentMenuList() {
       let currentPath = this.currentPath
-      if (currentPath.indexOf('admin') !== -1) return toFilterHavePermissionMenu(adminPlatformMenu, this.authList)
+      if (currentPath.indexOf('admin') !== -1)
+        return toFilterHavePermissionMenu(adminPlatformMenu, this.authList)
       else return []
     },
     authList() {

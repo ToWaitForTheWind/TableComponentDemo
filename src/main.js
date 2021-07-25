@@ -3,13 +3,13 @@ import App from './App.vue'
 import router from './router'
 import store from './store/index'
 import ElementUI from 'element-ui'
-import ViewUI from 'view-design';
+import ViewUI from 'view-design'
 
 import formatFn from '@/utils/format'
 import luckyUI from '@/luckyUI/index'
 
 import './styles.scss'
-import 'view-design/dist/styles/iview.css';
+import 'view-design/dist/styles/iview.css'
 
 import { authList } from '@/config/authConfig'
 
@@ -25,3 +25,5 @@ new Vue({
   store,
   render: h => h(App)
 }).$mount('#app')
+
+// 测试开始
