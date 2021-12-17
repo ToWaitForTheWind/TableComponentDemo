@@ -74,6 +74,7 @@
                       v-for="(item, index) in selectedDatas"
                       :key="index"
                       class="selected-tag"
+                      :class="{ 'delete-tag': isDeleted(item) }"
                     >
                       <span class="tag-text" :title="item[currentProps.label]">
                         {{ item[currentProps.label] }}
@@ -141,6 +142,9 @@
                       selectedDatas.length > 0
                   "
                   class="single-selected-data"
+                  :class="{
+                    'delete-selected-data': isDeleted(selectedDatas[0])
+                  }"
                   :title="currentSelectValue"
                 >
                   {{ currentSelectValue }}
@@ -180,29 +184,42 @@
       <DropdownMenu
         slot="list"
         class="dropdown-menu-area"
-        :style="`width: ${dropdownWidth};`"
+        :style="`min-width: ${width}; max-width: 400px;`"
       >
         <slot name="top"></slot>
         <div v-if="currentConfig.search" class="search-area" @click.stop>
-          <i-input
-            ref="searchRef"
-            v-model="searchValue"
-            class="search-input"
-            size="small"
-            autofocus
-            prefix=""
-            :placeholder="searchPlaceholder"
-            style="width: 100%;"
-            @on-change="event => searchItem(event.target.value)"
+          <div
+            class="fake-input"
+            :class="{ 'is-focus': isFocusSearch }"
+            @mouseover="isHoverSearch = true"
+            @mouseout="isHoverSearch = false"
           >
-            <i class="iconfont iconsousuo4" slot="prefix"></i>
-          </i-input>
+            <i class="iconfont iconsousuo4"></i>
+            <i-input
+              ref="searchRef"
+              v-model="searchValue"
+              class="search-input"
+              size="small"
+              autofocus
+              prefix=""
+              :placeholder="searchPlaceholder"
+              @on-focus="isFocusSearch = true"
+              @on-blur="isFocusSearch = false"
+              @on-change="event => searchItem(event.target.value)"
+            ></i-input>
+            <i
+              v-show="isHoverSearch && searchValue"
+              class="iconfont iconqingkong1"
+              @click.stop="toClearSearchValue"
+            ></i>
+          </div>
         </div>
         <div
           v-if="
             currentConfig.mode === 'list' &&
               currentConfig.multiple &&
-              currentConfig.showSelectAll
+              currentConfig.showSelectAll &&
+              currentDataList.length > 0
           "
           class="select-all"
           @click.stop="toSelectAll"
@@ -212,7 +229,10 @@
         </div>
         <div
           class="data-container"
-          :style="`max-height: ${dropdownMaxHeight}; overflow: auto;`"
+          :style="
+            `max-height: ${currentConfig.dropdownMaxLength *
+              27}px; overflow: auto;`
+          "
           @click.stop
         >
           <div v-if="loading" class="loading-content">
@@ -233,32 +253,37 @@
           <template v-else>
             <template v-if="currentDataList.length > 0">
               <template v-if="currentConfig.mode === 'list'">
-                <div
-                  v-for="(item, index) in currentDataList"
-                  :key="index"
-                  class="data-item"
-                  :title="item[currentProps.label]"
-                  :class="{
-                    'is-checked': isChecked(item),
-                    'can-not-select': item[currentProps.canNotSelect],
-                    'is-disabled': item[currentProps.disabled]
-                  }"
-                  @click.stop="toSelect(index, item)"
-                >
-                  <div class="data-label">
-                    <slot name="listItem" :listItem="item">
-                      <span
-                        v-html="
-                          filterShowName(item[currentProps.label], searchValue)
-                        "
-                      ></span>
-                    </slot>
+                <template v-for="(item, index) in currentDataList">
+                  <div
+                    v-if="!item[currentProps.delete]"
+                    :key="index"
+                    class="data-item"
+                    :title="item[currentProps.label]"
+                    :class="{
+                      'is-checked': isChecked(item),
+                      'can-not-select': item[currentProps.canNotSelect],
+                      'is-disabled': item[currentProps.disabled]
+                    }"
+                    @click.stop="toSelect(index, item)"
+                  >
+                    <div class="data-label">
+                      <slot name="listItem" :listItem="item">
+                        <span
+                          v-html="
+                            filterShowName(
+                              item[currentProps.label],
+                              searchValue
+                            )
+                          "
+                        ></span>
+                      </slot>
+                    </div>
+                    <i
+                      v-if="isChecked(item) && currentConfig.multiple"
+                      class="iconfont iconxuanzhong"
+                    ></i>
                   </div>
-                  <i
-                    v-if="isChecked(item) && currentConfig.multiple"
-                    class="iconfont iconxuanzhong"
-                  ></i>
-                </div>
+                </template>
               </template>
               <template v-if="currentConfig.mode === 'tree'">
                 <EasyTree
@@ -320,8 +345,6 @@ export default {
     loading: { type: Boolean, default: false }, // 数据展示是否处于loading状态
     loadingText: { type: String, default: '加载中' }, // 数据展示loading状态展示文案
     width: { type: String, default: '200px' }, // 组件宽度，默认200px
-    dropdownWidth: { type: String, default: '200px' }, // 组件下拉框宽度，默认200px
-    dropdownMaxHeight: { type: String, default: '230px' }, // 组件下拉框最大高度，默认230px
     emptyText: { type: String, default: '暂无数据' } // 下拉为空时的展示文案
   },
   data() {
@@ -334,18 +357,28 @@ export default {
       searchValue: '', // 搜索框绑定的值
       filterValue: '', // 设置筛选后输入的内容
       isFilterFocus: false, // 是否处于聚焦状态
-      showErrorMsg: false // 是否展示错误信息
+      showErrorMsg: false, // 是否展示错误信息
+      isHoverSearch: false, // search清空icon是否展示
+      isFocusSearch: false // search是否focus
     }
   },
   computed: {
     currentSelectValue() {
-      if (this.selectedDatas.length > 0)
-        return this.selectedDatas[0][this.currentProps.label]
-      else return ''
+      if (this.selectedDatas.length > 0) {
+        let res = this.selectedDatas[0][this.currentProps.label]
+        if (this.currentConfig.showParentPath && this.nodeParents.length > 0) {
+          res = `${this.nodeParents
+            .map(item => item[this.currentProps.label])
+            .join(this.currentConfig.splitSymbol)}${
+            this.currentConfig.splitSymbol
+          }${res}`
+        }
+        return res
+      } else return ''
     },
     currentConfig() {
       let config = {
-        theme: 'light', // 主题风格（light, dark）
+        // theme: 'light', // 主题风格（light, dark）
         placement: 'bottom-start', // dropdown位置（参考view-design的Dropdown组件）
         transfer: false, // 是否设置dropdown为transfer模式
         transferClass: '',
@@ -358,11 +391,14 @@ export default {
         showSelectAll: false, // 是否展示全选、全不选
         showSelectCount: false, // 是否展示已勾选数量
         useObjectValue: false, // 使用对象作为value绑定的值
-        noValue: false, // 不通过v-model绑定值（当noValue与useObjectValue一同出现时，以useObjectValue逻辑为先）
+        noValue: false, // 不通过v-model进行值绑定（当noValue与useObjectValue一同出现时，以useObjectValue逻辑为先）
         showDownArrow: true, // 当使用自定义触发下拉的时候通过此配置控制是否展示下拉箭头
         showDisabledError: false, // 设置点击disabled状态选项时是否展示错误信息
         disabledErrorMsg: '', // 点击disabled状态选项时展示的错误信息
-        mode: 'list' // 设置数据格式是tree还是list
+        mode: 'list', // 设置数据格式是tree还是list
+        showParentPath: false, // 展示选中的父级路径信息（仅在单选且mode为树形/级联时生效）
+        splitSymbol: '/', // 当展示父节点信息的时候的分隔符
+        dropdownMaxLength: 8 // 组件下拉框展示的最多条数，超出滚动
       }
       return { ...config, ...this.basicConfig }
     },
@@ -371,8 +407,9 @@ export default {
         label: 'label',
         value: 'value',
         children: 'children',
-        disabled: 'disabled',
-        canNotSelect: 'canNotSelect'
+        disabled: 'disabled', // 下拉节点置灰不可选
+        canNotSelect: 'canNotSelect', // 下拉节点正常显示，但是不可选
+        delete: 'delete' // 下拉节点不显示同时回显置灰
       }
       return { ...props, ...this.defaultProps }
     },
@@ -400,7 +437,7 @@ export default {
     alreadySelectAll() {
       // 当前是否已经全选
       let res = true
-      for (let item of this.dataList) {
+      for (let item of this.currentDataList) {
         if (
           !item[this.currentProps.disabled] &&
           this.selectedDataValues.findIndex(
@@ -410,6 +447,17 @@ export default {
           res = false
           break
         }
+      }
+      return res
+    },
+    nodeParents() {
+      // 储存树节点、级联节点的父节点
+      let res = []
+      if (this.selectedDatas.length > 0) {
+        res = this.toGetNodeParents(
+          this.selectedDatas[0][this.currentProps.value],
+          this.dataList
+        )
       }
       return res
     }
@@ -450,10 +498,13 @@ export default {
             } else throw new Error('The value of v-model must be an array') // 格式错误抛出异常
           } else {
             // 单选，value必须是对象
-            if (!Array.isArray(this.value) && typeof this.value === 'object') {
-              this.selectedDatas = [this.value]
-            } else if (!this.value || JSON.stringify(this.value) === '{}') {
+            if (!this.value || JSON.stringify(this.value) === '{}') {
               this.selectedDatas = []
+            } else if (
+              !Array.isArray(this.value) &&
+              typeof this.value === 'object'
+            ) {
+              this.selectedDatas = [this.value]
             } else throw new Error('The value of v-model must be an object') // 格式错误抛出异常
           }
           this.selectedDataValues = this.selectedDatas.map(
@@ -471,7 +522,9 @@ export default {
         }
         if (Array.isArray(this.value) && this.currentConfig.multiple) {
           this.selectedDataValues = this.value ? _.cloneDeep(this.value) : []
-        } else this.selectedDataValues = this.value ? [this.value] : []
+        } else
+          this.selectedDataValues =
+            this.value || this.value == 0 ? [this.value] : []
         this.toInitSelectDatas()
       }
     },
@@ -488,12 +541,22 @@ export default {
       this.selectedDatas = _.cloneDeep(selectedDatas)
     },
     isChecked(item) {
+      // 判断当前节点是否被选中
       if (
         this.selectedDataValues.findIndex(
           val => val == item[this.currentProps.value]
         ) > -1
       )
         return true
+      else return false
+    },
+    isDeleted(item) {
+      // 判断节点是否删除
+      if (!item) return false
+      let dataInfo = this.dataList.find(
+        data => item[this.currentProps.value] == data[this.currentProps.value]
+      )
+      if (dataInfo && dataInfo[this.currentProps.delete]) return true
       else return false
     },
     onClickOutSide() {
@@ -710,17 +773,19 @@ export default {
     },
     getTreeSelectDatas(list) {
       let res = []
+      let that = this
       list.forEach(item => {
+        that.selectedDataValues
         if (
-          this.selectedDataValues.findIndex(
-            val => val == item[this.currentProps.value]
+          that.selectedDataValues.findIndex(
+            val => val == item[that.currentProps.value]
           ) > -1
         )
           res.push(item)
-        if (item[this.currentProps.children])
+        if (item[that.currentProps.children])
           res = [
             ...res,
-            ...this.getTreeSelectDatas(item[this.currentProps.children])
+            ...that.getTreeSelectDatas(item[that.currentProps.children])
           ]
       })
       return res
@@ -746,21 +811,38 @@ export default {
     },
     toSelectAll() {
       if (this.loading) return
+      let dataList = []
       if (this.alreadySelectAll) {
         // 当前已被全选，执行全不选
-        this.toClearAllSelect()
+        this.selectedDatas.forEach(item => {
+          // 遍历当前已选择内容，过滤出来不在当前经过筛选的下拉框中的选项
+          let ifFind = this.currentDataList.find(
+            data =>
+              data[this.currentProps.value] == item[this.currentProps.value]
+          )
+          if (!ifFind) dataList.push(item)
+        })
+        this.selectedDatas = dataList
       } else {
         // 当前未全选，执行全选
-        this.selectedDatas = this.dataList.filter(
-          data => !data[this.currentProps.disabled]
-        )
-        this.selectedDataValues = this.selectedDatas.map(
-          item => item[this.currentProps.value]
-        )
-        this.toEmitValue()
-        this.$emit('selectAll', this.selectedDatas)
-        this.updateDropdownPosition()
+        this.currentDataList.forEach(item => {
+          // 遍历当前经过筛选的下拉框的选择，过滤出当前可选且未被选择的选项
+          let ifFind = this.selectedDataValues.find(
+            val => val == item[this.currentProps.value]
+          )
+          if (!ifFind) dataList.push(item)
+        })
+        this.selectedDatas = [...this.selectedDatas, ...dataList]
       }
+      this.selectedDataValues = this.selectedDatas.map(
+        item => item[this.currentProps.value]
+      )
+      this.toEmitValue()
+      this.$emit(
+        this.alreadySelectAll ? 'clearAll' : 'selectAll',
+        this.selectedDatas
+      )
+      this.updateDropdownPosition()
     },
     filterFocus() {
       setTimeout(() => {
@@ -799,6 +881,24 @@ export default {
     },
     toClearSearchValue() {
       this.searchValue = ''
+      this.searchItem()
+    },
+    toGetNodeParents(key, list, parents = []) {
+      // 获取父节点list
+      for (let item of list) {
+        if (item[this.currentProps.value] == key) return parents
+        else if (
+          item[this.currentProps.children] &&
+          item[this.currentProps.children].length > 0
+        ) {
+          let res = this.toGetNodeParents(key, item.children, [
+            ...parents,
+            item
+          ])
+          if (res.length) return res
+        }
+      }
+      return []
     }
   }
 }

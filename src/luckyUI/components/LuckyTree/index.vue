@@ -1,19 +1,21 @@
 <template>
   <div class="easy-tree" ref="treeWrap">
-    <Tree-node
-      v-for="(item, i) in stateTree"
-      :key="i"
-      :data="item"
-      visible
-      :multiple="multiple"
-      :default-props="currentProps"
-      :checked-values="checkedValues"
-      :search-value="searchValue"
-    >
-      <template #listItem="{ listItem }">
-        <slot name="listItem" :listItem="listItem"></slot>
-      </template>
-    </Tree-node>
+    <template v-for="(item, i) in stateTree">
+      <Tree-node
+        v-if="!item[currentProps.delete]"
+        :key="i"
+        :data="item"
+        visible
+        :multiple="multiple"
+        :default-props="currentProps"
+        :checked-values="checkedValues"
+        :search-value="searchValue"
+      >
+        <template #listItem="{ listItem }">
+          <slot name="listItem" :listItem="listItem"></slot>
+        </template>
+      </Tree-node>
+    </template>
     <div v-if="!stateTree.length" class="ivu-tree-empty">
       {{ emptyText }}
     </div>
@@ -49,7 +51,9 @@ export default {
         label: 'label',
         value: 'value',
         children: 'children',
-        disabled: 'disabled'
+        disabled: 'disabled', // 下拉节点置灰不可选
+        canNotSelect: 'canNotSelect', // 下拉节点正常显示，但是不可选
+        delete: 'delete' // 下拉节点不显示同时回显置灰
       }
       return { ...props, ...this.defaultProps }
     }
@@ -72,6 +76,7 @@ export default {
   },
   methods: {
     compileFlatState() {
+      // 拍平树节点，并标记父子节点
       let that = this
       let keyCounter = 0
       let childrenKey = that.currentProps.children
@@ -96,7 +101,8 @@ export default {
     },
     handleSelect(nodeKey) {
       if (!this.flatState[nodeKey]) return
-      const node = this.flatState[nodeKey].node
+      let node = this.flatState[nodeKey].node
+      // let parents = this.getParentsList(this.flatState[nodeKey]); // 获取节点的所以父节点
       this.$emit('change', node)
     },
     setDefaultExpand(array) {
@@ -110,6 +116,18 @@ export default {
           this.setDefaultExpand(item[this.currentProps.children])
       })
     }
+    /*
+     * getParentsList (current) {
+     *     // 获取节点的所有父节点
+     *     let parents = [];
+     *     let nodeInfo = current;
+     *     while (nodeInfo.parent !== undefined) {
+     *         parents.unshift(this.flatState[nodeInfo.parent].node);
+     *         nodeInfo = this.flatState[nodeInfo.parent];
+     *     }
+     *     return parents;
+     * },
+     */
   }
 }
 </script>
@@ -213,9 +231,14 @@ export default {
 
     .tree-node-checked-icon {
       transform: scale(0.7);
-      width: 12px;
+      width: calc(12px / 0.7);
       font-size: 12px;
       color: #4084ff;
+      opacity: 0;
+
+      &.is-show {
+        opacity: 1;
+      }
     }
   }
 }
