@@ -125,12 +125,13 @@ export default {
                 list.forEach(item => {
                     // 当设置默认展开全部或者处于搜索中时
                     if (that.currentConfig.defaultExpandAll || that.searchValue || level > 0) that.$set(item, 'expand', true);
-                    else if (checkedArray.find(checked => checked == item[that.defaultProps.value])) {
+                    else if (checkedArray.findIndex(checked => checked == item[that.defaultProps.value]) > -1) {
                         pathList.forEach(path => that.$set(path, 'expand', true));
                     }
                     if (item[that.currentProps.children] && item[that.currentProps.children].length > 0) {
                         pathList.push(item);
                         travel(item[that.currentProps.children], level - 1);
+                        pathList.pop();
                     }
                 });
             }

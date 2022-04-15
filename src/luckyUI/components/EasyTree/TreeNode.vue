@@ -105,7 +105,7 @@ export default {
             return this.data[this.defaultProps.children];
         },
         ifCurrentChecked () {
-            return this.checkedValues.find(item => item == this.data[this.defaultProps.value]);
+            return this.checkedValues.findIndex(item => item == this.data[this.defaultProps.value]) > -1;
         },
     },
     methods: {

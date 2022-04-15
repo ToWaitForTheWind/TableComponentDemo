@@ -1,8 +1,10 @@
 <template>
-    <transition name="easy-dialog-fade">
+    <transition
+        name="lq-dialog-fade"
+    >
         <div
             v-show="visible"
-            class="easy-dialog"
+            class="lq-dialog"
         >
             <div class="dialog-wrapper">
                 <div
@@ -13,18 +15,16 @@
                         v-if="showDefaultHeader"
                         class="dialog-header"
                     >
-                        <div class="easy-title">
-                            <slot name="header">
-                                <div
-                                    class="main-title"
-                                    :style="`max-width: ${secondTitle ? 50 : 80}%;`"
-                                >{{ mainTitle }}</div>
-                                <div
-                                    v-if="secondTitle"
-                                    class="second-title"
-                                    :title="secondTitle"
-                                >{{ secondTitle }}</div>
-                            </slot>
+                        <div class="lq-title">
+                            <div
+                                class="main-title"
+                                :style="`max-width: ${secondTitle ? 50 : 80}%;`"
+                            >{{ mainTitle }}</div>
+                            <div
+                                v-if="secondTitle"
+                                class="second-title"
+                                :title="secondTitle"
+                            >{{ secondTitle }}</div>
                         </div>
                         <div
                             v-if="showClose"
@@ -47,15 +47,15 @@
                             class="dialog-content-footer"
                         >
                             <slot name="footer">
-                                <easy-button
+                                <lq-button
                                     size="large"
                                     @click="toCancel"
-                                >取消</easy-button>
-                                <easy-button
+                                >取消</lq-button>
+                                <lq-button
                                     type="primary"
                                     size="large"
                                     @click="toConfirm"
-                                >确定</easy-button>
+                                >确定</lq-button>
                             </slot>
                         </div>
                     </div>
@@ -81,7 +81,7 @@ export default {
         maxHeight: { type: String, default: '462px' },
         showClose: { type: Boolean, default: true },
         appendToBody: { type: Boolean, default: true },
-        beforeClose: { type: Function, default: null },
+        beforeClose: Function,
     },
     data () {
         return {
@@ -137,7 +137,7 @@ export default {
 </script>
 
 <style lang="scss">
-.easy-dialog {
+.lq-dialog {
     position: fixed;
     top: 0;
     right: 0;
@@ -167,7 +167,7 @@ export default {
         padding: 20px;
     }
 
-    .easy-title {
+    .lq-title {
         line-height: 22px;
         display: flex;
     }
@@ -235,15 +235,15 @@ export default {
     }
 }
 
-.easy-dialog-fade-enter-active {
-    animation: easy-dialog-fade-in .3s;
+.lq-dialog-fade-enter-active {
+    animation: lq-dialog-fade-in .3s;
 }
 
-.easy-dialog-fade-leave-active {
-    animation: easy-dialog-fade-out .3s;
+.lq-dialog-fade-leave-active {
+    animation: lq-dialog-fade-out .3s;
 }
 
-@keyframes easy-dialog-fade-in {
+@keyframes lq-dialog-fade-in {
     0% {
         opacity: 0;
     }
@@ -253,7 +253,7 @@ export default {
     }
 }
 
-@keyframes easy-dialog-fade-out {
+@keyframes lq-dialog-fade-out {
     0% {
         opacity: 1;
     }

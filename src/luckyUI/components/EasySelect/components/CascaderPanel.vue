@@ -102,7 +102,7 @@ export default {
         toSetDefault () {
             if (!this.currentCheckedItem[this.currentProps.value]) {
                 if (!this.parentNodes.length || !this.parentNodes[this.level]) return;
-                if (this.list.find(item => item[this.currentProps.value] == this.parentNodes[this.level][this.currentProps.value])) {
+                if (this.list.findIndex(item => item[this.currentProps.value] == this.parentNodes[this.level][this.currentProps.value]) > -1) {
                     // 切换到其他数据的时候不在parentNodes中就不往下触发
                     this.toTriggerNext(this.parentNodes[this.level]);
                 }

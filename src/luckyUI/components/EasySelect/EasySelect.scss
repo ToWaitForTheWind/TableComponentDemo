@@ -164,12 +164,6 @@
         position: relative;
         overflow: auto;
 
-        .scroll-data {
-            position: absolute;
-            top: 0;
-            width: 100%;
-        }
-
         .data-item {
             height: 27px;
             line-height: 27px;
@@ -216,11 +210,22 @@
         .easy-tree {
             padding: 0 12px;
         }
+
+        .lq-virtual-tree {
+            .scroll-item {
+                padding: 0 12px;
+            }
+        }
     }
 
     .placeholder-text {
         user-select: none;
         color: #c7ccd4 !important;
+        height: 28px;
+        line-height: 28px;
+    }
+
+    .custom-set-show {
         height: 28px;
         line-height: 28px;
     }
