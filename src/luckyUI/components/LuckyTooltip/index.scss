@@ -1,0 +1,62 @@
+.lucky-tooltip-popper {
+    position: absolute;
+    border-radius: 4px;
+    padding: 10px;
+    z-index: 999;
+    font-size: 12px;
+    line-height: 1.2;
+    min-width: 10px;
+    word-wrap: break-word;
+    background: rgba(70, 76, 91, .9);
+    color: #FFF;
+
+    .lucky-popper-arrow {
+        position: absolute;
+        display: block;
+        width: 0;
+        height: 0;
+        border-color: transparent;
+        border-style: solid;
+        border-width: 5px;
+    }
+
+    &[x-placement^="top"] {
+        margin-bottom: 6px;
+    }
+
+    &[x-placement^="top"] .lucky-popper-arrow {
+        bottom: -4px;
+        border-top-color: rgba(70, 76, 91, .9);
+        border-bottom-width: 0;
+    }
+
+    &[x-placement^="bottom"] {
+        margin-top: 6px;
+    }
+
+    &[x-placement^="bottom"] .lucky-popper-arrow {
+        top: -4px;
+        border-top-width: 0;
+        border-bottom-color: rgba(70, 76, 91, .9);
+    }
+
+    &[x-placement^="right"] {
+        margin-left: 6px;
+    }
+
+    &[x-placement^="right"] .lucky-popper-arrow {
+        left: -5px;
+        border-right-color: rgba(70, 76, 91, .9);
+        border-left-width: 0;
+    }
+
+    &[x-placement^="left"] {
+        margin-right: 6px;
+    }
+
+    &[x-placement^="left"] .lucky-popper-arrow {
+        right: -4px;
+        border-right-width: 0;
+        border-left-color: rgba(70, 76, 91, .9);
+    }
+}
