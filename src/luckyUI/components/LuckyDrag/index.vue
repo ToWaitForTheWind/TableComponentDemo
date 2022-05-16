@@ -1,20 +1,20 @@
 <template>
   <div class="lucky-drag">
+    <!-- <transition-group name="flip-list" tag="div"> -->
     <div
       class="lucky-drag-item"
       v-for="(item, index) in currentDataList"
-      :key="index"
+      :key="item[currentProps.value]"
       :class="{ 'is-selected': toFindIfSelected(item) > -1 }"
       draggable
       @dragstart="e => onDragStart(e, index)"
-      @drag="e => onDrag(e, index)"
       @dragend="e => onDragEnd(e, index)"
       @dragover="e => onDragOver(e, index)"
-      @mousedown="e => onMouseDown(e, index)"
       @click="e => onClick(e, index)"
     >
       <slot name="listItem" :listItem="item"></slot>
     </div>
+    <!-- </transition-group> -->
   </div>
 </template>
 
@@ -61,91 +61,96 @@ export default {
     },
     toEmitValue() {
       // 修改双向绑定的值
-      this.$emit('input', cloneDeep(currentDataList))
+      this.$emit('input', cloneDeep(this.currentDataList))
     },
     onDragStart(e, index) {
-      this.dragItem = this.currentDataList[index]
+      let currentDataList = cloneDeep(this.currentDataList)
+      this.dragItem = currentDataList[index]
       this.startIndex = index
-    },
-    onDrag(e) {
-      console.log(e)
+      // 归拢选中项
+      if (this.selectedList.length > 1) {
+        if (index > 0) {
+          for (let i = index - 1; i >= 0; i--) {
+            // 从拖拽点开始向上遍历找到第一个未被选中项
+            let notSelectItem = currentDataList[i]
+            let findIndex = this.toFindIfSelected(notSelectItem)
+            if (findIndex === -1) {
+              // 删除已被选择的
+              this.removeSelectedData(currentDataList)
+              // 在删除了已选中的列表中查找未被选中的元素的下标，然后将selectedList插入
+              let notSelectIndex = currentDataList.findIndex(
+                item =>
+                  notSelectItem[this.currentProps.value] ==
+                  item[this.currentProps.value]
+              )
+              if (notSelectIndex !== -1)
+                currentDataList.splice(
+                  notSelectIndex + 1,
+                  0,
+                  ...this.selectedList
+                )
+              break
+            }
+          }
+        } else {
+          // 删除已被选择的
+          this.removeSelectedData(currentDataList)
+          currentDataList.unshift(...this.selectedList)
+        }
+        this.$nextTick(() => {
+          this.currentDataList = currentDataList
+        })
+      }
     },
     onDragEnd(e) {
       this.dragItem = null
       this.startIndex = -1
     },
     onDragOver(e, index) {
-      let hoverItem = this.currentDataList[index]
+      let currentDataList = cloneDeep(this.currentDataList)
+      let hoverItem = currentDataList[index]
       if (
         this.dragItem[this.currentProps.value] ===
         hoverItem[this.currentProps.value]
       )
         return
-      let findIndex = this.toFindIfSelected(hoverItem)
-      if (findIndex > -1) {
-        // hover的是已勾选的
-        if (this.startIndex < index) {
-          // 从上往下拖拽
-          // 位置调换
-          this.removeSelectedData()
-          this.currentDataList.splice(index, 0, ...this.selectedList)
-        } else if (this.startIndex > index) {
-          // 从下往上拖拽
+
+      if (this.startIndex < index) {
+        // 从上往下拖拽
+        // 先计算拖拽了长度
+        let dragLength = index - this.startIndex
+        let lastNotSelectIndex = -1
+        for (let i = 0; i < currentDataList.length; i++) {
+          let ifSelected = this.toFindIfSelected(currentDataList[i])
+          if (ifSelected === -1) lastNotSelectIndex = i
+          else break
         }
-      } else {
-        // hover的是未勾选的
-        if (this.startIndex < index) {
-          // 从上往下拖拽
-        } else if (this.startIndex > index) {
-          // 从下往上拖拽
+        // 删除已被选择的
+        this.removeSelectedData(currentDataList)
+        let replaceIndex = lastNotSelectIndex + dragLength + 1
+        currentDataList.splice(replaceIndex, 0, ...this.selectedList)
+        this.startIndex = replaceIndex + this.toFindIfSelected(this.dragItem)
+      } else if (this.startIndex > index) {
+        // 从下往上拖拽
+        // 先计算拖拽了长度
+        let dragLength = this.startIndex - index
+        let lastNotSelectIndex = -1
+        for (let i = 0; i < currentDataList.length; i++) {
+          let ifSelected = this.toFindIfSelected(currentDataList[i])
+          if (ifSelected === -1) lastNotSelectIndex = i
+          else break
         }
+        // 删除已被选择的
+        this.removeSelectedData(currentDataList)
+        let replaceIndex = lastNotSelectIndex - dragLength + 1
+        if (replaceIndex < 0) replaceIndex = 0
+        currentDataList.splice(replaceIndex, 0, ...this.selectedList)
+        this.startIndex = replaceIndex + this.toFindIfSelected(this.dragItem)
       }
-      // if (
-      //   // findIndex === -1 &&
-      //   this.dragItem[this.currentProps.value] !==
-      //   hoverItem[this.currentProps.value]
-      // ) {
-      //   let domHeight = e.target.offsetHeight
-      //   if (this.startIndex < index) {
-      //     // 从上往下拖拽
-      //     if (e.offsetY > domHeight / 2) {
-      //       // 位置调换
-      //       this.removeSelectedData()
-      //       let indexAfterDelete = this.currentDataList.findIndex(
-      //         item =>
-      //           item[this.currentProps.value] ===
-      //           hoverItem[this.currentProps.value]
-      //       )
-      //       this.currentDataList.splice(
-      //         ++indexAfterDelete,
-      //         0,
-      //         ...this.selectedList
-      //       )
-      //       this.startIndex =
-      //         indexAfterDelete + this.toFindIfSelected(this.dragItem)
-      //     }
-      //   } else if (this.startIndex > index) {
-      //     // 从下往上拖拽
-      //     if (e.offsetY < domHeight / 2) {
-      //       // 位置调换
-      //       this.removeSelectedData()
-      //       let indexAfterDelete = this.currentDataList.findIndex(
-      //         item =>
-      //           item[this.currentProps.value] ===
-      //           hoverItem[this.currentProps.value]
-      //       )
-      //       this.currentDataList.splice(
-      //         indexAfterDelete,
-      //         0,
-      //         ...this.selectedList
-      //       )
-      //       this.startIndex =
-      //         indexAfterDelete + this.toFindIfSelected(this.dragItem)
-      //     }
-      //   }
-      // }
+      this.$nextTick(() => {
+        this.currentDataList = currentDataList
+      })
     },
-    onMouseDown(e, index) {},
     toFindIfSelected(item) {
       let findIndex = this.selectedList.findIndex(
         data => data[this.currentProps.value] == item[this.currentProps.value]
@@ -165,12 +170,12 @@ export default {
       }
       this.selectedList.sort((a, b) => a.index - b.index) // 排序
     },
-    removeSelectedData() {
+    removeSelectedData(currentDataList) {
       this.selectedList.forEach(item => {
-        let findIndex = this.currentDataList.findIndex(
+        let findIndex = currentDataList.findIndex(
           data => data[this.currentProps.value] == item[this.currentProps.value]
         )
-        if (findIndex > -1) this.currentDataList.splice(findIndex, 1)
+        if (findIndex > -1) currentDataList.splice(findIndex, 1)
       })
     }
   }
@@ -181,6 +186,9 @@ export default {
 .lucky-drag {
   .is-selected {
     border: 1px solid red;
+  }
+  .flip-list-move {
+    transition: transform 0.5s;
   }
 }
 </style>
