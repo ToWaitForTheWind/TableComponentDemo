@@ -12,8 +12,8 @@
         {
           'is-multiple': currentConfig.multiple,
           'is-single': !currentConfig.multiple,
-          'is-disabled': disabled
-        }
+          'is-disabled': disabled,
+        },
       ]"
       :transfer-class-name="
         `lucky-select-dropdown ${currentConfig.transferClass} ${
@@ -43,7 +43,7 @@
             class="trigger-search-area small-scroll-bar"
             :class="{
               'is-collapse': currentConfig.collapse,
-              'is-focus': visible
+              'is-focus': visible,
             }"
             :style="`width: ${width};`"
           >
@@ -150,7 +150,7 @@
                     "
                     class="single-selected-data"
                     :class="{
-                      'delete-selected-data': isDeleted(selectedDatas[0])
+                      'delete-selected-data': isDeleted(selectedDatas[0]),
                     }"
                     :title="currentSelectValue"
                   >
@@ -286,7 +286,8 @@
                       filterValue,
                     defaultExpandLevel: currentConfig.defaultExpandLevel,
                     canNotSelectLevel: currentConfig.canNotSelectLevel,
-                    useVirtualScrollNumber: currentConfig.useVirtualScrollNumber
+                    useVirtualScrollNumber:
+                      currentConfig.useVirtualScrollNumber,
                   }"
                   class="small-scroll-bar"
                   @change="treeCheckedChange"
@@ -300,11 +301,11 @@
                         <span
                           v-for="(filterItem, filterIndex) in filterShowName(
                             listItem[currentProps.label],
-                            searchValue
+                            searchValue,
                           )"
                           :key="filterIndex"
                           :class="{
-                            'danger-color': filterItem.type === 'matched'
+                            'danger-color': filterItem.type === 'matched',
                           }"
                         >
                           {{ filterItem.val }}
@@ -333,9 +334,9 @@
                         {
                           'is-checked': isChecked(listItem),
                           'can-not-select': listItem[currentProps.canNotSelect],
-                          'is-disabled': listItem[currentProps.disabled]
+                          'is-disabled': listItem[currentProps.disabled],
                         },
-                        listItem[currentProps.className]
+                        listItem[currentProps.className],
                       ]"
                       @click.stop="toSelect(listIndex, listItem)"
                     >
@@ -359,11 +360,11 @@
                                 currentConfig.mode === ECascader &&
                                   currentMode === EList
                                   ? filterValue
-                                  : searchValue
+                                  : searchValue,
                               )"
                               :key="filterIndex"
                               :class="{
-                                'danger-color': filterItem.type === 'matched'
+                                'danger-color': filterItem.type === 'matched',
                               }"
                             >
                               {{ filterItem.val }}
@@ -427,7 +428,7 @@ export default {
       currentConfig: this.currentConfig,
       currentProps: this.currentProps,
       toGetNodeParents: this.toGetNodeParents,
-      filterShowName
+      filterShowName,
     }
   },
   props: {
@@ -442,7 +443,8 @@ export default {
     loadingText: { type: String, default: '加载中' }, // 数据展示loading状态展示文案
     width: { type: String, default: '200px' }, // 组件宽度，默认200px
     beforeTriggerVisible: { type: Function, default: null }, // 展开下拉前的触发方法
-    emptyText: { type: String, default: '暂无数据' } // 下拉为空时的展示文案
+    emptyText: { type: String, default: '暂无数据' }, // 下拉为空时的展示文案
+    labelValueMap: { type: Object, default: () => ({}) }, // 用于展示上次已选的map映射
   },
   data() {
     return {
@@ -462,7 +464,8 @@ export default {
       isHoverSearch: false, // search清空icon是否展示
       isFocusSearch: false, // search是否focus
       flatCascaderList: [], // 扁平化后的级联下拉数据
-      currentMode: EList // 由于级联在搜索状态下展示与其正常情况下不同，需要进行mode变换
+      currentMode: EList, // 由于级联在搜索状态下展示与其正常情况下不同，需要进行mode变换
+      ifShouldTop: false, // 记录下拉展开之后dataList变更次数
     }
   },
   computed: {
@@ -523,7 +526,8 @@ export default {
         canNotSelectLevel: 0, // tree模式下默认前几级不可选
         useFuzzySearch: true, // 是否使用大小写模糊搜索
         checkStrictly: false, // 在tree模式下是否强关联父子选择
-        placeSelectedToTop: true // 在list模式下勾选内容是否置顶
+        placeSelectedToTop: true, // 在list模式下勾选内容是否置顶
+        emitNoMatchFunc: false, // 是否向外抛出匹配不到事件
       }
       return { ...config, ...this.basicConfig }
     },
@@ -535,13 +539,13 @@ export default {
         disabled: 'disabled', // 下拉节点置灰不可选
         canNotSelect: 'canNotSelect', // 下拉节点正常显示，但是不可选
         delete: 'delete', // 下拉节点不显示同时回显置灰
-        className: 'className' // 自定义节点class
+        className: 'className', // 自定义节点class
       }
       return { ...props, ...this.defaultProps }
     },
     selectedDataText() {
       let labelList = this.selectedDatas.map(
-        item => item[this.currentProps.label]
+        item => item[this.currentProps.label],
       )
       return labelList.join('、')
     },
@@ -567,7 +571,7 @@ export default {
         if (
           !item[this.currentProps.disabled] &&
           this.selectedDataValues.findIndex(
-            val => val == item[this.currentProps.value]
+            val => val == item[this.currentProps.value],
           ) === -1
         ) {
           res = false
@@ -582,7 +586,7 @@ export default {
       if (this.selectedDatas.length > 0) {
         res = this.toGetNodeParents(
           this.selectedDatas[0][this.currentProps.value],
-          this.dataList
+          this.dataList,
         )
       }
       return res
@@ -591,33 +595,36 @@ export default {
       return (
         this.currentDataList.length > this.currentConfig.useVirtualScrollNumber
       )
-    }
+    },
   },
   watch: {
     value: {
       handler() {
         this.initData()
       },
-      deep: true
+      deep: true,
     },
     dataList: {
       handler(arr) {
-        this.toSetCurrentDataList(cloneDeep(arr))
+        this.toSetCurrentDataList(cloneDeep(arr), this.searchValue)
         this.toInitSelectDatas()
-        this.toPlaceSelectedToTop()
+        if (this.ifShouldTop) {
+          this.toPlaceSelectedToTop()
+        }
       },
       immediate: true,
-      deep: true
+      deep: true,
     },
     searchValue(val) {
       this.$emit('onSearchValChange', val)
     },
     visible(val) {
+      if (val) this.ifShouldTop = true
       this.$emit('onOpenChange', val)
     },
     'currentConfig.mode'(val) {
       this.currentMode = val
-    }
+    },
   },
   created() {},
   mounted() {
@@ -646,7 +653,7 @@ export default {
         if (!Array.isArray(this.value) && typeof this.value !== 'object') {
           // 判断绑定值类型
           throw new Error(
-            'useObjectValue模式下v-model的值必须是一个数组或者对象'
+            'useObjectValue模式下v-model的值必须是一个数组或者对象',
           ) // 格式错误抛出异常
         } else {
           if (this.currentConfig.multiple) {
@@ -655,7 +662,7 @@ export default {
               this.selectedDatas = cloneDeep(this.value)
             } else
               throw new Error(
-                'useObjectValue模式多选情况下v-model的值必须是一个数组'
+                'useObjectValue模式多选情况下v-model的值必须是一个数组',
               ) // 格式错误抛出异常
           } else {
             // 单选，value必须是对象
@@ -668,11 +675,11 @@ export default {
               this.selectedDatas = [this.value]
             } else
               throw new Error(
-                'useObjectValue模式单选情况下v-model的值必须是一个对象'
+                'useObjectValue模式单选情况下v-model的值必须是一个对象',
               ) // 格式错误抛出异常
           }
           this.selectedDataValues = this.selectedDatas.map(
-            item => item[this.currentProps.value]
+            item => item[this.currentProps.value],
           )
         }
       } else {
@@ -699,37 +706,49 @@ export default {
       if (this.currentConfig.mode === EList) {
         this.selectedDataValues.forEach(value => {
           let findRes = this.dataList.find(
-            item => value == item[this.currentProps.value]
+            item => value == item[this.currentProps.value],
           )
           if (findRes !== undefined) selectedDatas.push(findRes)
           else {
-            let notExitItem = {}
-            notExitItem[this.currentProps.value] = value
-            notExitItem[this.currentProps.label] = `${value}`
-            notExitItem[this.currentProps.delete] = true
-            selectedDatas.push(notExitItem)
+            if (this.currentConfig.emitNoMatchFunc)
+              this.$emit('noMatchData', value)
+            else {
+              let notExitItem = {}
+              notExitItem[this.currentProps.value] = value
+              notExitItem[this.currentProps.label] = this.labelValueMap[value]
+                ? this.labelValueMap[value]
+                : `${value}`
+              notExitItem[this.currentProps.delete] = true
+              selectedDatas.push(notExitItem)
+            }
           }
         })
       } else {
         let treeSelectedDatas = this.getTreeSelectDatas(this.dataList)
         this.selectedDataValues.forEach(value => {
           let findRes = treeSelectedDatas.find(
-            item => value == item[this.currentProps.value]
+            item => value == item[this.currentProps.value],
           )
           if (findRes !== undefined) selectedDatas.push(findRes)
           else {
-            let notExitItem = {}
-            notExitItem[this.currentProps.value] = value
-            notExitItem[this.currentProps.label] = `${value}`
-            notExitItem[this.currentProps.delete] = true
-            selectedDatas.push(notExitItem)
+            if (this.currentConfig.emitNoMatchFunc)
+              this.$emit('noMatchData', value)
+            else {
+              let notExitItem = {}
+              notExitItem[this.currentProps.value] = value
+              notExitItem[this.currentProps.label] = this.labelValueMap[value]
+                ? this.labelValueMap[value]
+                : `${value}`
+              notExitItem[this.currentProps.delete] = true
+              selectedDatas.push(notExitItem)
+            }
           }
         })
       }
       this.selectedDatas = cloneDeep(selectedDatas)
       // 由于存在只有value但是又不在下拉列表中的数据，所以这里反向通过datas重新获取一下values
       this.selectedDataValues = this.selectedDatas.map(
-        item => item[this.currentProps.value]
+        item => item[this.currentProps.value],
       )
     },
     toSetCascaderDatas() {
@@ -738,7 +757,7 @@ export default {
       let dataList = this.dataList
       this.selectedDataValues.forEach(value => {
         let findRes = dataList.find(
-          item => value == item[this.currentProps.value]
+          item => value == item[this.currentProps.value],
         )
         if (findRes !== undefined) {
           selectedDatas.push(findRes)
@@ -756,7 +775,7 @@ export default {
       // 判断当前节点是否被选中
       if (
         this.selectedDataValues.findIndex(
-          val => val == item[this.currentProps.value]
+          val => val == item[this.currentProps.value],
         ) > -1
       )
         return true
@@ -766,7 +785,7 @@ export default {
       // 判断节点是否删除
       if (!item) return false
       let dataInfo = this.dataList.find(
-        data => item[this.currentProps.value] == data[this.currentProps.value]
+        data => item[this.currentProps.value] == data[this.currentProps.value],
       )
       if (
         (dataInfo && dataInfo[this.currentProps.delete]) ||
@@ -808,7 +827,7 @@ export default {
         this.toSetCurrentDataList(this.dataList, filterValue)
       },
       500,
-      { leading: true }
+      { leading: true },
     ),
     // 过滤下拉列表
     toSetCurrentDataList(arr, filter) {
@@ -834,16 +853,17 @@ export default {
             if (ifInclude) filterArr.push(item)
           })
         }
-        this.currentDataList = filterArr
+        this.currentDataList = cloneDeep(filterArr)
       }
       this.updateDropdownPosition()
     },
     // 点击下拉列表某一项触发
     toSelect(index, selectItem) {
+      this.ifShouldTop = false
       if (selectItem[this.currentProps.canNotSelect]) return // canNotSelect节点标识点击无效
       this.$emit('nodeClick', selectItem)
       let currentDataList = this.currentDataList.filter(
-        item => !item[this.currentProps.delete]
+        item => !item[this.currentProps.delete],
       )
       if (selectItem[this.currentProps.disabled]) {
         this.$emit('disabledChecked', selectItem)
@@ -861,7 +881,7 @@ export default {
           selectItem[this.currentProps.value]
         ) {
           let findRes = this.selectedDataValues.findIndex(
-            val => val == selectItem[this.currentProps.value]
+            val => val == selectItem[this.currentProps.value],
           )
           if (findRes > -1) {
             this.selectedDataValues.splice(findRes, 1)
@@ -881,7 +901,7 @@ export default {
           selectItem[this.currentProps.value]
         ) {
           let checkedIndex = this.selectedDataValues.findIndex(
-            val => val == selectItem[this.currentProps.value]
+            val => val == selectItem[this.currentProps.value],
           )
           if (checkedIndex > -1) {
             // 当前已选中，则取消
@@ -899,6 +919,7 @@ export default {
       }
     },
     toRemoveSelect(selectItem) {
+      this.ifShouldTop = false
       if (this.disabled) return
       // 置灰选项不可被移除时直接返回
       if (
@@ -907,7 +928,7 @@ export default {
       )
         return
       let findRes = this.selectedDataValues.findIndex(
-        val => val == selectItem[this.currentProps.value]
+        val => val == selectItem[this.currentProps.value],
       )
       if (findRes > -1) {
         this.selectedDataValues.splice(findRes, 1)
@@ -918,19 +939,20 @@ export default {
       this.updateDropdownPosition()
     },
     toClearAllSelect() {
+      this.ifShouldTop = false
       if (this.disabled) return
       let datas = []
       if (this.currentConfig.disabledCanRemove) {
         // 不可选择项不移除
         datas = this.selectedDatas.filter(
-          item => item[this.currentProps.canNotSelect]
+          item => item[this.currentProps.canNotSelect],
         )
       } else {
         // 置灰选项不被移除
         datas = this.selectedDatas.filter(
           item =>
             item[this.currentProps.canNotSelect] ||
-            item[this.currentProps.disabled]
+            item[this.currentProps.disabled],
         )
       }
       this.selectedDatas = datas
@@ -943,6 +965,7 @@ export default {
       if (this.currentConfig.mode === ECascader) this.visible = false
     },
     treeCheckedChange(selectItem) {
+      this.ifShouldTop = false
       this.$emit('nodeClick', selectItem)
       if (selectItem[this.currentProps.disabled]) {
         this.$emit('disabledChecked', selectItem)
@@ -956,7 +979,7 @@ export default {
         // 如果已回显的disabled状态的数据，点击将会去掉选择
         if (!this.currentConfig.disabledCanRemove) return
         let findRes = this.selectedDataValues.findIndex(
-          val => val == selectItem[this.currentProps.value]
+          val => val == selectItem[this.currentProps.value],
         )
         if (findRes > -1) {
           this.selectedDataValues.splice(findRes, 1)
@@ -974,7 +997,7 @@ export default {
       } else {
         // 多选
         let findRes = this.selectedDataValues.findIndex(
-          val => val == selectItem[this.currentProps.value]
+          val => val == selectItem[this.currentProps.value],
         )
         if (findRes > -1) {
           // 当前点击的值已选中，则取消
@@ -986,12 +1009,12 @@ export default {
             if (children && children.length) {
               let currentAndChildren = this.toGetTreeNodeChildren(children)
               let currentAndChildrenIds = currentAndChildren.map(
-                item => item[this.currentProps.value]
+                item => item[this.currentProps.value],
               )
               currentAndChildrenIds.forEach(childId => {
                 // 遍历所有子节点，找到被勾选的，删除掉
                 let childIndex = this.selectedDataValues.findIndex(
-                  val => val == childId
+                  val => val == childId,
                 )
                 if (childIndex > -1) {
                   this.selectedDataValues.splice(childIndex, 1)
@@ -1010,7 +1033,7 @@ export default {
             if (children && children.length) {
               let currentChildren = this.toGetTreeNodeChildren(children)
               let currentChildrenIds = currentChildren.map(
-                item => item[this.currentProps.value]
+                item => item[this.currentProps.value],
               )
               this.selectedDataValues.push(...currentChildrenIds)
               this.selectedDatas.push(...currentChildren)
@@ -1027,14 +1050,14 @@ export default {
       list.forEach(item => {
         if (
           this.selectedDataValues.findIndex(
-            val => val == item[this.currentProps.value]
+            val => val == item[this.currentProps.value],
           ) > -1
         )
           res.push(item)
         if (item[this.currentProps.children])
           res = [
             ...res,
-            ...this.getTreeSelectDatas(item[this.currentProps.children])
+            ...this.getTreeSelectDatas(item[this.currentProps.children]),
           ]
       })
       return res
@@ -1047,7 +1070,7 @@ export default {
         if (item[this.currentProps.children]) {
           let childrenFilterList = this.getFilteredTree(
             item[this.currentProps.children],
-            filter
+            filter,
           )
           if (childrenFilterList.length) {
             item[this.currentProps.children] = childrenFilterList
@@ -1058,6 +1081,7 @@ export default {
       return res
     },
     toSelectAll() {
+      this.ifShouldTop = false
       if (this.loading) return
       let dataList = []
       if (this.alreadySelectAll) {
@@ -1075,7 +1099,8 @@ export default {
             let ifFind =
               this.currentDataList.findIndex(
                 data =>
-                  data[this.currentProps.value] == item[this.currentProps.value]
+                  data[this.currentProps.value] ==
+                  item[this.currentProps.value],
               ) > -1
             if (!ifFind) dataList.push(item)
           }
@@ -1091,7 +1116,7 @@ export default {
           ) {
             let ifFind =
               this.selectedDataValues.findIndex(
-                val => val == item[this.currentProps.value]
+                val => val == item[this.currentProps.value],
               ) > -1
             if (!ifFind) dataList.push(item)
           }
@@ -1100,13 +1125,13 @@ export default {
       }
       let alreadySelectAll = this.alreadySelectAll
       this.selectedDataValues = this.selectedDatas.map(
-        item => item[this.currentProps.value]
+        item => item[this.currentProps.value],
       )
       this.toEmitValue()
 
       this.$emit(
         alreadySelectAll ? 'clearAll' : 'selectAll',
-        this.selectedDatas
+        this.selectedDatas,
       )
       this.updateDropdownPosition()
     },
@@ -1168,7 +1193,7 @@ export default {
           let res = this.toGetNodeParents(
             key,
             item[this.currentProps.children],
-            [...parents, item]
+            [...parents, item],
           )
           if (res.length) return res
         }
@@ -1176,10 +1201,11 @@ export default {
       return []
     },
     cascaderCheckedChange(selectInfo) {
+      this.ifShouldTop = false
       if (this.currentConfig.useValuePath) {
         this.selectedDatas = cloneDeep(selectInfo)
         this.selectedDataValues = selectInfo.map(
-          item => item[this.currentProps.value]
+          item => item[this.currentProps.value],
         )
         this.toEmitValue()
         this.toEmitChange(this.selectedDataValues)
@@ -1202,13 +1228,13 @@ export default {
           ) {
             flatLabel(item[that.currentProps.children], [
               ...parentLabels,
-              item[that.currentProps.label]
+              item[that.currentProps.label],
             ])
           } else {
             let newItem = item
             newItem[that.currentProps.label] = [
               ...parentLabels,
-              item[that.currentProps.label]
+              item[that.currentProps.label],
             ].join('/')
             res.push(newItem)
           }
@@ -1268,16 +1294,20 @@ export default {
         this.currentConfig.mode === EList &&
         this.selectedDataValues.length > 0
       ) {
+        let shouldTopData = []
         this.selectedDataValues.forEach(val => {
           let index = this.currentDataList.findIndex(
-            item => item[this.currentProps.value] == val
+            item => item[this.currentProps.value] == val,
           )
-          if (index > -1) this.currentDataList.splice(index, 1)
+          if (index > -1) {
+            shouldTopData.push(this.currentDataList[index])
+            this.currentDataList.splice(index, 1)
+          }
         })
-        this.currentDataList.unshift(...this.selectedDatas)
+        this.currentDataList.unshift(...shouldTopData)
       }
-    }
-  }
+    },
+  },
 }
 </script>
 

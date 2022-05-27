@@ -579,7 +579,8 @@
     }
 }
 
-.ivu-form-item-error {
+.ivu-form-item-error,
+.lucky-select-is-error {
     .trigger-search-area {
         border: 1px solid #ef604f;
 
