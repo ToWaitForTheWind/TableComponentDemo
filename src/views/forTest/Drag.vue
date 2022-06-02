@@ -1,5 +1,6 @@
 <template>
   <div class="test-drag">
+    <LuckyButton>aaaaaa</LuckyButton>
     <LuckyDrag v-model="list">
       <template #listItem="{ listItem }">
         <div class="item">{{ listItem.value }}</div>
@@ -20,15 +21,15 @@ export default {
         { value: 2 },
         { value: 3 },
         { value: 4 },
-        { value: 5 }
-      ]
+        { value: 5 },
+      ],
     }
   },
   computed: {},
   watch: {},
   created() {},
   mounted() {},
-  methods: {}
+  methods: {},
 }
 </script>
 

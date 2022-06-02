@@ -8,8 +8,8 @@
       :class="{ 'is-selected': toFindIfSelected(item) > -1 }"
       draggable
       @dragstart="e => onDragStart(e, index)"
-      @dragend="e => onDragEnd(e, index)"
-      @dragover="e => onDragOver(e, index)"
+      @dragend="onDragEnd"
+      @dragover="e => onHover(e, index)"
       @click="e => onClick(e, index)"
     >
       <slot name="listItem" :listItem="item"></slot>
@@ -24,13 +24,14 @@ export default {
   components: {},
   props: {
     value: { type: Array, default: () => [] }, // v-model绑定的值
-    defaultProps: { type: Object, default: () => {} } // 可以选择性设置，不要求全部传递
+    defaultProps: { type: Object, default: () => {} }, // 可以选择性设置，不要求全部传递
   },
   data() {
     return {
       currentDataList: [],
       selectedList: [],
-      dragItem: {}
+      dragItem: {},
+      lastHoverItem: {},
     }
   },
   computed: {
@@ -38,35 +39,48 @@ export default {
       let props = {
         value: 'value',
         disabled: 'disabled', // 下拉节点置灰不可选
-        canNotSelect: 'canNotSelect' // 下拉节点正常显示，但是不可选
+        canNotSelect: 'canNotSelect', // 下拉节点正常显示，但是不可选
       }
       return { ...props, ...this.defaultProps }
-    }
+    },
   },
   watch: {
     value: {
       handler() {
         this.initData()
       },
-      deep: true
-    }
+      deep: true,
+    },
   },
   created() {},
   mounted() {
     this.initData()
   },
+  beforeDestroy() {
+    document.removeEventListener('mouseup', this.onDragEnd)
+  },
   methods: {
     initData() {
       this.currentDataList = cloneDeep(this.value)
+      document.addEventListener('mouseup', this.onDragEnd)
     },
     toEmitValue() {
       // 修改双向绑定的值
       this.$emit('input', cloneDeep(this.currentDataList))
     },
     onDragStart(e, index) {
+      // 隐藏拖拽阴影
+      e.dataTransfer.setDragImage(
+        e.target,
+        window.outerWidth,
+        window.outerHeight,
+      )
+
       let currentDataList = cloneDeep(this.currentDataList)
       this.dragItem = currentDataList[index]
       this.startIndex = index
+      let ifSelected = this.toFindIfSelected(this.dragItem)
+      if (ifSelected === -1) return
       // 归拢选中项
       if (this.selectedList.length > 1) {
         if (index > 0) {
@@ -76,25 +90,25 @@ export default {
             let findIndex = this.toFindIfSelected(notSelectItem)
             if (findIndex === -1) {
               // 删除已被选择的
-              this.removeSelectedData(currentDataList)
+              this.removeSelectedData(this.selectedList, currentDataList)
               // 在删除了已选中的列表中查找未被选中的元素的下标，然后将selectedList插入
               let notSelectIndex = currentDataList.findIndex(
                 item =>
                   notSelectItem[this.currentProps.value] ==
-                  item[this.currentProps.value]
+                  item[this.currentProps.value],
               )
               if (notSelectIndex !== -1)
                 currentDataList.splice(
                   notSelectIndex + 1,
                   0,
-                  ...this.selectedList
+                  ...this.selectedList,
                 )
               break
             }
           }
         } else {
           // 删除已被选择的
-          this.removeSelectedData(currentDataList)
+          this.removeSelectedData(this.selectedList, currentDataList)
           currentDataList.unshift(...this.selectedList)
         }
         this.$nextTick(() => {
@@ -102,11 +116,26 @@ export default {
         })
       }
     },
-    onDragEnd(e) {
+    onDragEnd() {
       this.dragItem = null
       this.startIndex = -1
     },
+    onHover(e, index) {
+      e.preventDefault()
+      // e.dataTransfer.dropEffect = 'all'
+      let currentItem = this.currentDataList[index]
+      if (
+        this.lastHoverItem[this.currentProps.value] ===
+        currentItem[this.currentProps.value]
+      )
+        return
+      else {
+        this.lastHoverItem = currentItem
+        this.onDragOver(e, index)
+      }
+    },
     onDragOver(e, index) {
+      if (!this.dragItem) return
       let currentDataList = cloneDeep(this.currentDataList)
       let hoverItem = currentDataList[index]
       if (
@@ -117,35 +146,51 @@ export default {
 
       if (this.startIndex < index) {
         // 从上往下拖拽
-        // 先计算拖拽了长度
-        let dragLength = index - this.startIndex
-        let lastNotSelectIndex = -1
-        for (let i = 0; i < currentDataList.length; i++) {
-          let ifSelected = this.toFindIfSelected(currentDataList[i])
-          if (ifSelected === -1) lastNotSelectIndex = i
-          else break
+        let ifSelected = this.toFindIfSelected(this.dragItem)
+        if (ifSelected === -1) {
+          // 删除已被选择的
+          this.removeSelectedData([this.dragItem], currentDataList)
+          currentDataList.splice(index, 0, this.dragItem)
+          this.startIndex = index
+        } else {
+          // 先计算拖拽了长度
+          let dragLength = index - this.startIndex
+          let lastNotSelectIndex = -1
+          for (let i = 0; i < currentDataList.length; i++) {
+            let ifSelected = this.toFindIfSelected(currentDataList[i])
+            if (ifSelected === -1) lastNotSelectIndex = i
+            else break
+          }
+          // 删除已被选择的
+          this.removeSelectedData(this.selectedList, currentDataList)
+          let replaceIndex = lastNotSelectIndex + dragLength + 1
+          currentDataList.splice(replaceIndex, 0, ...this.selectedList)
+          this.startIndex = replaceIndex + this.toFindIfSelected(this.dragItem)
         }
-        // 删除已被选择的
-        this.removeSelectedData(currentDataList)
-        let replaceIndex = lastNotSelectIndex + dragLength + 1
-        currentDataList.splice(replaceIndex, 0, ...this.selectedList)
-        this.startIndex = replaceIndex + this.toFindIfSelected(this.dragItem)
       } else if (this.startIndex > index) {
         // 从下往上拖拽
-        // 先计算拖拽了长度
-        let dragLength = this.startIndex - index
-        let lastNotSelectIndex = -1
-        for (let i = 0; i < currentDataList.length; i++) {
-          let ifSelected = this.toFindIfSelected(currentDataList[i])
-          if (ifSelected === -1) lastNotSelectIndex = i
-          else break
+        let ifSelected = this.toFindIfSelected(this.dragItem)
+        if (ifSelected === -1) {
+          // 删除已被选择的
+          this.removeSelectedData([this.dragItem], currentDataList)
+          currentDataList.splice(index, 0, this.dragItem)
+          this.startIndex = index
+        } else {
+          // 先计算拖拽了长度
+          let dragLength = this.startIndex - index
+          let lastNotSelectIndex = -1
+          for (let i = 0; i < currentDataList.length; i++) {
+            let ifSelected = this.toFindIfSelected(currentDataList[i])
+            if (ifSelected === -1) lastNotSelectIndex = i
+            else break
+          }
+          // 删除已被选择的
+          this.removeSelectedData(this.selectedList, currentDataList)
+          let replaceIndex = lastNotSelectIndex - dragLength + 1
+          if (replaceIndex < 0) replaceIndex = 0
+          currentDataList.splice(replaceIndex, 0, ...this.selectedList)
+          this.startIndex = replaceIndex + this.toFindIfSelected(this.dragItem)
         }
-        // 删除已被选择的
-        this.removeSelectedData(currentDataList)
-        let replaceIndex = lastNotSelectIndex - dragLength + 1
-        if (replaceIndex < 0) replaceIndex = 0
-        currentDataList.splice(replaceIndex, 0, ...this.selectedList)
-        this.startIndex = replaceIndex + this.toFindIfSelected(this.dragItem)
       }
       this.$nextTick(() => {
         this.currentDataList = currentDataList
@@ -153,7 +198,7 @@ export default {
     },
     toFindIfSelected(item) {
       let findIndex = this.selectedList.findIndex(
-        data => data[this.currentProps.value] == item[this.currentProps.value]
+        data => data[this.currentProps.value] == item[this.currentProps.value],
       )
       return findIndex
     },
@@ -170,15 +215,16 @@ export default {
       }
       this.selectedList.sort((a, b) => a.index - b.index) // 排序
     },
-    removeSelectedData(currentDataList) {
-      this.selectedList.forEach(item => {
+    removeSelectedData(selectedList, currentDataList) {
+      selectedList.forEach(item => {
         let findIndex = currentDataList.findIndex(
-          data => data[this.currentProps.value] == item[this.currentProps.value]
+          data =>
+            data[this.currentProps.value] == item[this.currentProps.value],
         )
         if (findIndex > -1) currentDataList.splice(findIndex, 1)
       })
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -188,7 +234,10 @@ export default {
     border: 1px solid red;
   }
   .flip-list-move {
-    transition: transform 0.5s;
+    transition: transform 0.1s;
+  }
+  .lucky-drag-item {
+    cursor: pointer;
   }
 }
 </style>
