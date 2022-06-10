@@ -607,6 +607,7 @@ export default {
     dataList: {
       handler(arr) {
         this.toSetCurrentDataList(cloneDeep(arr), this.searchValue)
+        this.initData()
         this.toInitSelectDatas()
         if (this.ifShouldTop) {
           this.toPlaceSelectedToTop()

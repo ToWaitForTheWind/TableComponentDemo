@@ -1,0 +1,21 @@
+.virtual-box {
+    position: relative;
+    overflow: auto;
+
+    .virtual-box-fake {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
+
+    .virtual-box-true {
+        width: 100%;
+    }
+
+    .virtual-box-item {
+        width: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+}
