@@ -5,7 +5,7 @@ import entrance from './views/index'
 import {
   adminPlatformMenu,
   toFilterHavePermissionMenu,
-  toFindNextRedirectRouter
+  toFindNextRedirectRouter,
 } from '@/config/menuConfig'
 import { authList } from '@/config/authConfig'
 
@@ -15,7 +15,7 @@ const UserOperate = () => import('@/views/userManage/UserOperate')
 const LoopholeList = () => import('@/views/loophole/LoopholeList')
 const DepartmentList = () => import('@/views/department/DepartmentList')
 const NoAuth = () => import('@/views/common/NoAuth')
-const test1 = () => import('@/views/forTest/Drag')
+const test1 = () => import('@/views/forTest/TestTable')
 const Regexp = () => import('@/views/Regexp')
 
 Vue.use(Router)
@@ -23,7 +23,7 @@ Vue.use(Router)
 const routes = [
   {
     path: '/',
-    redirect: '/admin'
+    redirect: '/admin',
   },
   {
     path: '/admin',
@@ -32,8 +32,8 @@ const routes = [
     redirect: to => {
       return {
         name: toFindNextRedirectRouter(
-          toFilterHavePermissionMenu(adminPlatformMenu, authList)
-        ).name
+          toFilterHavePermissionMenu(adminPlatformMenu, authList),
+        ).name,
       }
     },
     children: [
@@ -42,77 +42,77 @@ const routes = [
         name: 'admin_main',
         component: HomePage,
         meta: {
-          requireAuth: true
-        }
+          requireAuth: true,
+        },
       },
       {
         path: 'userList',
         name: 'admin_user',
         component: UserList,
         meta: {
-          requireAuth: true
-        }
+          requireAuth: true,
+        },
       },
       {
         path: 'userList/add',
         name: 'admin_user_add',
         component: UserOperate,
         meta: {
-          requireAuth: true
-        }
+          requireAuth: true,
+        },
       },
       {
         path: 'userList/:id/edit',
         name: 'admin_user_edit',
         component: UserOperate,
         meta: {
-          requireAuth: true
-        }
+          requireAuth: true,
+        },
       },
       {
         path: 'department',
         name: 'admin_department',
         component: DepartmentList,
         meta: {
-          requireAuth: true
-        }
+          requireAuth: true,
+        },
       },
       {
         path: 'loophole',
         name: 'admin_loophole',
         component: LoopholeList,
         meta: {
-          requireAuth: true
-        }
+          requireAuth: true,
+        },
       },
       {
         path: 'regexp',
         name: 'admin_regexp',
         component: Regexp,
         meta: {
-          requireAuth: true
-        }
+          requireAuth: true,
+        },
       },
       {
         path: 'test',
         name: 'admin_test',
         component: test1,
         meta: {
-          requireAuth: true
-        }
-      }
-    ]
+          requireAuth: true,
+        },
+      },
+    ],
   },
   {
     path: '/noAuth',
     name: 'noAuth',
-    component: NoAuth
-  }
+    component: NoAuth,
+  },
 ]
 
 const router = new Router({
   routes,
-  strict: process.env.NODE_ENV !== 'production'
+  strict: process.env.NODE_ENV !== 'production',
 })
 router.beforeEach(async (to, from, next) => {
   if (to.matched.some(record => record.meta.requireAuth)) {

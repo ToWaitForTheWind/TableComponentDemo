@@ -2,6 +2,7 @@
   <div
     :ref="`listContainer${randomNum}`"
     class="lucky-virtual-list"
+    :class="{ 'use-virtual-scroll': useVirtualScroll }"
     :style="
       `height: ${(dataList.length > showNumber ? showNumber : dataList.length) *
         itemHeight}px;`
@@ -39,20 +40,20 @@ export default {
     showNumber: { type: Number, default: 8 }, // 当前视窗展示条数
     itemHeight: { type: Number, default: 20 }, // 每一条内容的高度
     dataList: { type: Array, default: () => [] },
-    useVirtualScroll: { type: Boolean, default: false }
+    useVirtualScroll: { type: Boolean, default: false },
   },
   data() {
     return {
       startNum: 0, // 当前视窗范围内第一个元素下标
       positionTop: 0, // 当前视窗范围内第一个元素偏移量
-      randomNum: '' // 一个随机数
+      randomNum: '', // 一个随机数
     }
   },
   computed: {
     activeList() {
       const start = this.startNum
       return this.dataList.slice(start, start + this.showNumber)
-    }
+    },
   },
   watch: {},
   created() {
@@ -61,7 +62,7 @@ export default {
   mounted() {
     this.$refs[`listContainer${this.randomNum}`].addEventListener(
       'scroll',
-      this.scrollEvent
+      this.scrollEvent,
     )
   },
   beforeDestroyed() {
@@ -72,15 +73,18 @@ export default {
       const { scrollTop } = event.target
       this.startNum = parseInt(scrollTop / this.itemHeight)
       this.positionTop = scrollTop
-    }
-  }
+    },
+  },
 }
 </script>
 
 <style lang="scss" scoped>
 .lucky-virtual-list {
-  overflow-y: auto;
   display: flex;
+
+  &.use-virtual-scroll {
+    overflow-y: auto;
+  }
 
   .scroll-data {
     width: 100%;

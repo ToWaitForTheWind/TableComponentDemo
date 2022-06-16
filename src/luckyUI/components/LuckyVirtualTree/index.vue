@@ -2,6 +2,7 @@
   <div
     :ref="`treeContainer${randomNum}`"
     class="lucky-virtual-tree"
+    :class="{ 'use-virtual-scroll': useVirtualScroll }"
     :style="
       `height: ${(showFlattedTreeList.length > showNumber
         ? showNumber
@@ -26,9 +27,9 @@
         :class="[
           {
             'is-disabled': item[currentProps.disabled],
-            'is-multiple': currentConfig.multiple
+            'is-multiple': currentConfig.multiple,
           },
-          item[currentProps.className]
+          item[currentProps.className],
         ]"
         :style="`height: ${itemHeight}px; line-height: ${itemHeight}px;`"
       >
@@ -79,7 +80,7 @@ export default {
     dataList: { type: Array, default: () => [] },
     checkedValues: { type: Array, default: () => [] }, // 当前选中项
     defaultProps: { type: Object, default: () => {} }, // 可以选择性设置，不要求全部传递
-    basicConfig: { type: Object, default: () => {} }
+    basicConfig: { type: Object, default: () => {} },
   },
   data() {
     return {
@@ -87,7 +88,7 @@ export default {
       positionTop: 0, // 当前视窗范围内第一个元素偏移量
       randomNum: '', // 一个随机数
       currentDataList: [],
-      flattedTreeList: [] // 拍平之后的数据
+      flattedTreeList: [], // 拍平之后的数据
     }
   },
   computed: {
@@ -98,7 +99,7 @@ export default {
         children: 'children',
         disabled: 'disabled', // 下拉节点置灰不可选
         canNotSelect: 'canNotSelect', // 下拉节点正常显示，但是不可选
-        delete: 'delete' // 下拉节点不显示同时回显置灰
+        delete: 'delete', // 下拉节点不显示同时回显置灰
       }
       return { ...props, ...this.defaultProps }
     },
@@ -108,7 +109,7 @@ export default {
         defaultExpandLevel: 1, // tree模式下默认展开层级数
         defaultExpandAll: true, // tree模式下默认是否展开全部
         canNotSelectLevel: 0, // tree模式下默认前几级不可选
-        useVirtualScrollNumber: 50 // 使用虚拟滚动的临界值
+        useVirtualScrollNumber: 50, // 使用虚拟滚动的临界值
       }
       return { ...config, ...this.basicConfig }
     },
@@ -118,7 +119,7 @@ export default {
     },
     showFlattedTreeList() {
       return this.flattedTreeList.filter(
-        item => item.isShow && !item[this.currentProps.delete]
+        item => item.isShow && !item[this.currentProps.delete],
       )
     },
     useVirtualScroll() {
@@ -127,7 +128,7 @@ export default {
         this.showFlattedTreeList.length >
         this.currentConfig.useVirtualScrollNumber
       )
-    }
+    },
   },
   watch: {
     dataList: {
@@ -136,8 +137,8 @@ export default {
         this.toSetFlattedData(this.currentDataList)
       },
       deep: true,
-      immediate: true
-    }
+      immediate: true,
+    },
   },
   created() {
     this.randomNum = Math.random()
@@ -145,7 +146,7 @@ export default {
   mounted() {
     this.$refs[`treeContainer${this.randomNum}`].addEventListener(
       'scroll',
-      this.scrollEvent
+      this.scrollEvent,
     )
   },
   beforeDestroyed() {
@@ -172,12 +173,12 @@ export default {
             that.$set(
               item,
               'isExpand',
-              item.level < that.currentConfig.defaultExpandLevel
+              item.level < that.currentConfig.defaultExpandLevel,
             )
             that.$set(
               item,
               'isShow',
-              item.level <= that.currentConfig.defaultExpandLevel
+              item.level <= that.currentConfig.defaultExpandLevel,
             )
           }
           resList.push(item)
@@ -199,7 +200,7 @@ export default {
         list.forEach(item => {
           if (
             checkedArray.findIndex(
-              checked => checked == item[that.currentProps.value]
+              checked => checked == item[that.currentProps.value],
             ) > -1
           ) {
             // 已勾选节点的展开处理
@@ -230,7 +231,7 @@ export default {
     ifCurrentChecked(current) {
       return (
         this.checkedValues.findIndex(
-          item => item == current[this.currentProps.value]
+          item => item == current[this.currentProps.value],
         ) > -1
       )
     },
@@ -263,15 +264,18 @@ export default {
     handleSelect(item) {
       if (item.level < this.currentConfig.canNotSelectLevel) return // 低于设置的层级不可点击
       this.$emit('change', item)
-    }
-  }
+    },
+  },
 }
 </script>
 
 <style lang="scss" scoped>
 .lucky-virtual-tree {
-  overflow-y: auto;
   display: flex;
+
+  &.use-virtual-scroll {
+    overflow-y: auto;
+  }
 
   .scroll-data {
     width: 100%;
