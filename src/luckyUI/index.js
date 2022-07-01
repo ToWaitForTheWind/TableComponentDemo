@@ -11,6 +11,8 @@ import LuckyContentLayout from './components/LuckyContentLayout'
 import LuckyLazySelect from './components/LuckyLazySelect'
 import LuckyRuleInput from './components/LuckyRuleInput'
 import LuckyTable from './components/LuckyTable'
+import directive from './components/LuckyLoading/directive'
+import service from './components/LuckyLoading/index'
 import './assets/commom.scss'
 
 export default {
@@ -28,5 +30,7 @@ export default {
     Vue.component('LuckyLazySelect', LuckyLazySelect)
     Vue.component('LuckyRuleInput', LuckyRuleInput)
     Vue.component('LuckyTable', LuckyTable)
-  }
+    Vue.use(directive)
+    Vue.prototype.$loading = service
+  },
 }

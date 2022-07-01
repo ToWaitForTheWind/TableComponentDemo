@@ -1,5 +1,12 @@
 <template>
-  <div class="home_page">我是首页啦啦啦啦啦...</div>
+  <div class="home_page">
+    <div
+      class="test-event"
+      @click="onClick"
+      @mousedown="onMouseDown"
+      @mouseup="onMouseUp"
+    ></div>
+  </div>
 </template>
 
 <script>
@@ -13,8 +20,24 @@ export default {
   watch: {},
   created() {},
   mounted() {},
-  methods: {}
+  methods: {
+    onClick() {
+      console.log('onClick')
+    },
+    onMouseDown() {
+      console.log('onMouseDown')
+    },
+    onMouseUp() {
+      console.log('onMouseUp')
+    },
+  },
 }
 </script>
 
-<style lang="scss"></style>
+<style lang="scss">
+.test-event {
+  width: 100px;
+  height: 100px;
+  background-color: cyan;
+}
+</style>

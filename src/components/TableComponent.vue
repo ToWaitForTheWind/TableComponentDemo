@@ -1,5 +1,5 @@
 <template>
-  <div class="table-component" v-loading="loading">
+  <div class="table-component" v-luckyLoading="loading">
     <header>
       <div class="header-operate">
         <!-- 操作按钮插槽 -->
@@ -12,7 +12,9 @@
           :icon="btnItem.icon"
           size="medium"
           @click="toEmitFunc(btnItem.func)"
-        >{{btnItem.text}}</el-button>
+        >
+          {{ btnItem.text }}
+        </el-button>
       </div>
       <div class="header-filter">
         <!-- 筛选项插槽 -->
@@ -56,7 +58,11 @@
           v-model="search"
           @keyup.13.native="toSearch"
         >
-          <i slot="suffix" class="el-input__icon el-icon-search" @click="toSearch"></i>
+          <i
+            slot="suffix"
+            class="el-input__icon el-icon-search"
+            @click="toSearch"
+          ></i>
         </el-input>
       </div>
     </header>
@@ -67,7 +73,11 @@
         @selection-change="handleSelection"
         @sort-change="handleSort"
       >
-        <el-table-column v-if="tableData.isMulti" type="selection" width="50"></el-table-column>
+        <el-table-column
+          v-if="tableData.isMulti"
+          type="selection"
+          width="50"
+        ></el-table-column>
         <template v-for="(item, index) in tableData.thead">
           <el-table-column
             :key="index"
@@ -78,36 +88,54 @@
             :sortable="item.sortable"
           >
             <template slot-scope="scope">
-              <span class="table-operation" v-if="item.prop === 'operation' && scope.row.hasOwnProperty('operation')">
+              <span
+                class="table-operation"
+                v-if="
+                  item.prop === 'operation' &&
+                    scope.row.hasOwnProperty('operation')
+                "
+              >
                 <span
                   class="text-btn"
                   v-for="(item, index) in scope.row.operation"
                   :class="item.type"
                   :key="index"
                   @click="toEmitFunc(item.event, scope.row)"
-                >{{item.text}}</span>
+                >
+                  {{ item.text }}
+                </span>
               </span>
               <span
                 v-else-if="item.formatType === 'link'"
                 :class="item.formatClass || 'to-detail-link'"
                 :title="scope.row[item.prop]"
                 @click="toLink(item.linkUrl, scope.row)"
-              >{{scope.row[item.prop]}}</span>
+              >
+                {{ scope.row[item.prop] }}
+              </span>
               <span
                 class="default-cell"
                 v-else-if="!item.formatFn || item.formatFn === ''"
                 :title="scope.row[item.prop]"
-              >{{scope.row[item.prop]}}</span>
+              >
+                {{ scope.row[item.prop] }}
+              </span>
               <span
                 v-else-if="item.formatType === 'dom'"
                 :class="item.formatFn"
-                v-html="formatFunc(item.formatFn, scope.row[item.prop], scope.row)"
+                v-html="
+                  formatFunc(item.formatFn, scope.row[item.prop], scope.row)
+                "
               ></span>
               <span
                 v-else
                 :class="item.formatFn"
-                :title="formatFunc(item.formatFn, scope.row[item.prop], scope.row)"
-              >{{formatFunc(item.formatFn, scope.row[item.prop], scope.row)}}</span>
+                :title="
+                  formatFunc(item.formatFn, scope.row[item.prop], scope.row)
+                "
+              >
+                {{ formatFunc(item.formatFn, scope.row[item.prop], scope.row) }}
+              </span>
             </template>
           </el-table-column>
         </template>
@@ -133,7 +161,7 @@ export default {
       type: Object,
       default: () => {
         return {}
-      }
+      },
     },
     tableData: {
       type: Object,
@@ -142,13 +170,13 @@ export default {
           thead: [],
           tbody: [],
           isMulti: false,
-          pageInfo: { page: 1, size: 10, total: 0 }
+          pageInfo: { page: 1, size: 10, total: 0 },
         }
-      }
+      },
     },
-    loading: { type: Boolean, default: false }
+    loading: { type: Boolean, default: false },
   },
-  data () {
+  data() {
     return {
       defaultConfig: {
         btnList: [],
@@ -160,37 +188,37 @@ export default {
         showDatePick: false,
         datePickType: 'daterange',
         startPlaceholder: '开始日期',
-        endPlaceholder: '结束日期'
+        endPlaceholder: '结束日期',
       },
       search: '',
       dateRange: [],
-      filter: ''
+      filter: '',
     }
   },
   computed: {
-    propConfig () {
+    propConfig() {
       return { ...this.defaultConfig, ...this.tableConfig }
-    }
+    },
   },
   watch: {},
-  created () {},
-  mounted () {},
+  created() {},
+  mounted() {},
   methods: {
-    toEmitFunc (funName, params) {
+    toEmitFunc(funName, params) {
       this.$emit(funName, params)
     },
-    toSearch () {
+    toSearch() {
       this.toEmitFunc('setFilter', { search: this.search, page: 1 })
     },
-    pageChange (val) {
+    pageChange(val) {
       this.toEmitFunc('setFilter', { page: val })
     },
-    handleSelection (val) {
+    handleSelection(val) {
       let cluster = {
         id: [],
         status: [],
         grantee: [],
-        rows: []
+        rows: [],
       }
       val.forEach(element => {
         cluster.id.push(element.id)
@@ -200,38 +228,38 @@ export default {
       })
       this.toEmitFunc('selectionChange', cluster)
     },
-    handleSort (value) {
+    handleSort(value) {
       this.toEmitFunc('setFilter', {
         prop: value.prop,
-        order: value.order
+        order: value.order,
       })
     },
-    handleTimerange () {
+    handleTimerange() {
       if (this.dateRange) {
         this.toEmitFunc('setFilter', {
           startTime: this.dateRange[0],
-          endTime: this.dateRange[1]
+          endTime: this.dateRange[1],
         })
       } else {
         this.toEmitFunc('setFilter', {
           startTime: '',
-          endTime: ''
+          endTime: '',
         })
       }
     },
-    handleSelect () {
+    handleSelect() {
       this.toEmitFunc('setFilter', {
-        filter: this.filter
+        filter: this.filter,
       })
     },
-    toLink (url, row) {
+    toLink(url, row) {
       if (url) {
         this.$router.push(`${url}/${row.id}`)
       } else {
         this.$router.push(this.$route.path + '/detail/' + row.id)
       }
-    }
-  }
+    },
+  },
 }
 </script>
 

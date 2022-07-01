@@ -6,12 +6,10 @@
         :class="{ 'is-sorting': isSorting }"
         :style="headerStyle"
       >
-        <div
-          class="lq-table-checkbox"
-          :class="{ 'if-show': (checkAll || indeterminate) && !isSorting }"
-        >
+        <div class="lq-table-checkbox">
           <Checkbox
             v-model="checkAll"
+            v-show="!isSorting"
             :indeterminate="indeterminate"
             size="small"
             @on-change="handleCheckAll"
@@ -51,11 +49,12 @@
           size="small"
           @on-change="checkedChange"
         >
-          <LqVirtualList
+          <LqVirtualListDynamic
             :data-list="currentDataList"
             :show-number="10"
             :item-height="60"
             :use-virtual-scroll="useVirtualScroll"
+            :is-dynamic="currentConfig.dynamicHeight"
             class="small-scroll-bar"
           >
             <template #listItem="{ listItem, listIndex }">
@@ -63,17 +62,22 @@
                 class="body-item"
                 :class="{
                   'can-drag': isSorting,
-                  'if-checked': checkedList.includes(
-                    listItem[currentProps.value],
-                  ),
+                  'if-selected':
+                    listItem[currentProps.value] ===
+                    currentSelectItem[currentProps.value],
                   isDragging: isDragging && toFindIfDragging(listItem),
                 }"
-                :style="`grid-template-columns: ${cellWidth};`"
+                :style="
+                  `grid-template-columns: ${cellWidth}; ${
+                    currentConfig.dynamicHeight ? 'height' : 'min-height'
+                  }: ${currentConfig.itemHeight}px;`
+                "
                 @mousedown="e => onDragStart(e, listIndex)"
                 @mouseup="onDragEnd"
                 @mouseover="e => onHover(e, listIndex)"
+                @click="toSelectItem(listItem)"
               >
-                <div class="lq-table-checkbox">
+                <div class="lq-table-checkbox" @click.stop>
                   <Checkbox
                     :key="listItem[currentProps.value]"
                     :label="listItem[currentProps.value]"
@@ -93,10 +97,18 @@
                     <slot :name="hItem.prop" :dataItem="listItem">
                       <lq-tooltip
                         v-if="hItem.showTooltip"
-                        :content="listItem[hItem.prop]"
                         placement="top-start"
                         :open-delay="currentConfig.tooltipDelay"
+                        custom-class="lq-table-content-tip"
                       >
+                        <div slot="content">
+                          <span>{{ listItem[hItem.prop] }}</span>
+                          <i
+                            v-if="currentConfig.showTooltipCopy"
+                            class="iconfont iconfuzhi-2 copy-icon"
+                            @click="toCopyMessage(listItem[hItem.prop])"
+                          ></i>
+                        </div>
                         <span>{{ listItem[hItem.prop] }}</span>
                       </lq-tooltip>
                       <span v-else>{{ listItem[hItem.prop] }}</span>
@@ -108,24 +120,31 @@
                 </div>
               </div>
             </template>
-          </LqVirtualList>
+          </LqVirtualListDynamic>
         </CheckboxGroup>
       </div>
     </div>
-    <div class="lq-table-footer">
+    <div v-if="showPagination" class="lq-table-footer">
       <LqPagination v-on="$listeners" v-bind="$attrs"></LqPagination>
     </div>
-    <div v-if="showMultiOperate" class="bottom-config">
-      <div
-        v-for="(item, index) in operateConfig"
-        :key="index"
-        class="operate-item"
-        @click="toEmitOperate(item.funcName)"
-      >
-        <i class="iconfont" :class="item.icon"></i>
-        <span>{{ item.label }}</span>
-      </div>
-    </div>
+    <!-- 多选操作方案被废弃 -->
+    <!-- <div
+            v-if="showMultiOperate"
+            class="bottom-config"
+            >
+            <div
+            v-for="(item, index) in operateConfig"
+            :key="index"
+            class="operate-item"
+            @click="toEmitOperate(item.funcName)"
+            >
+            <i
+            class="iconfont"
+            :class="item.icon"
+            ></i>
+            <span>{{ item.label }}</span>
+            </div>
+            </div> -->
     <div v-if="isSorting" class="bottom-config">
       <div v-if="isMessage" class="operate-item" style="opacity: 1;">
         拖拽列表内容改变顺序
@@ -155,7 +174,8 @@ export default {
     defaultProps: { type: Object, default: () => {} }, // 可以选择性设置，不要求全部传递
     basicConfig: { type: Object, default: () => {} }, // 可以选择性设置，不要求全部传递
     isSorting: { type: Boolean, default: false }, // 是否处于排序状态
-    operateConfig: { type: Array, default: () => [] }, // 批量操作的配置
+    showPagination: { type: Boolean, default: true }, // 是否展示分页功能
+    // operateConfig: { type: Array, default: () => [] }, // 批量操作的配置
   },
   data() {
     return {
@@ -165,15 +185,19 @@ export default {
       checkAll: false,
       showMessageTimer: null,
       isMessage: false, // 由于拖拽排序刚出来要显示5s message，隐藏添加标识控制
+      currentSelectItem: {},
     }
   },
   computed: {
     currentConfig() {
       let config = {
         useVirtualScrollNumber: 20, // 使用虚拟滚动的临界值
-        tooltipDelay: 500, // tooltip的延时展示
         useHeaderSticky: false, // 是否表头吸顶
         headerStickyOffset: 0, // 吸顶相对偏移量
+        tooltipDelay: 500, // tooltip的延时展示
+        showTooltipCopy: true, // 是否展示tooltip的复制按钮
+        dynamicHeight: false, // 表格内容是否不定高度
+        itemHeight: 60, // 表格每一行高度
       }
       return { ...config, ...this.basicConfig }
     },
@@ -222,17 +246,15 @@ export default {
       else return false
     },
     useVirtualScroll() {
-      return this.dataList.length > this.currentConfig.useVirtualScrollNumber
+      return (
+        this.dataList.length > this.currentConfig.useVirtualScrollNumber &&
+        !this.currentConfig.dynamicHeight
+      )
     },
     // 是否展示多选操作项
     showMultiOperate() {
       let res = false
-      if (
-        !this.isSorting &&
-        this.checkedList.length > 0 &&
-        this.operateConfig.length > 0
-      )
-        res = true
+      // if (!this.isSorting && this.checkedList.length > 0 && this.operateConfig.length > 0) res = true;
       return res
     },
   },
@@ -252,7 +274,7 @@ export default {
         this.showMessageTimer = null
         this.showMessageTimer = setTimeout(() => {
           this.isMessage = false
-        }, 3000)
+        }, 5000)
       }
     },
   },
@@ -268,11 +290,11 @@ export default {
     toSort(item) {
       if (this.sortInfo.prop !== item.prop) {
         this.$set(this.sortInfo, 'prop', item.prop)
-        this.$set(this.sortInfo, 'status', 'ASC')
+        this.$set(this.sortInfo, 'status', 'DESC')
       } else {
         let currentSortStatus = this.sortInfo.status
-        if (!currentSortStatus) currentSortStatus = 'ASC'
-        else if (currentSortStatus === 'ASC') currentSortStatus = 'DESC'
+        if (!currentSortStatus) currentSortStatus = 'DESC'
+        else if (currentSortStatus === 'DESC') currentSortStatus = 'ASC'
         else currentSortStatus = ''
         this.$set(this.sortInfo, 'status', currentSortStatus)
       }
@@ -290,10 +312,12 @@ export default {
         }
       })
     },
+    // 选中项发生变化
     checkedChange() {
       if (this.checkedList.length === this.currentDataList.length)
         this.checkAll = true
       else this.checkAll = false
+      this.$emit('onCheckedChange', this.checkedList) // 选中项修改向外抛出事件
     },
     toEmitOperate(funcName) {
       this.$emit(funcName, this.checkedList)
@@ -319,6 +343,18 @@ export default {
       }
       return `position: sticky; left: ${offset}px;`
     },
+    // 点击行进行选中
+    toSelectItem(item) {
+      if (this.isSorting) return
+      this.currentSelectItem = item
+      this.$emit('itemClick', item)
+    },
+    // tooltip里面的复制
+    toCopyMessage(msg) {
+      let clipboardData = navigator.clipboard
+      clipboardData.writeText(msg)
+      this.$Message.success('复制成功')
+    },
   },
 }
 </script>
@@ -337,24 +373,11 @@ export default {
     line-height: 20px;
     color: #6e7386;
     font-weight: bold;
-    height: 40px;
+    height: 34px;
+    background-color: #f9fafc;
 
-    &:hover {
-      .lq-table-checkbox {
-        .ivu-checkbox-wrapper {
-          opacity: 1;
-        }
-      }
-    }
-  }
-
-  .is-sorting {
-    &:hover {
-      .lq-table-checkbox {
-        .ivu-checkbox-wrapper {
-          opacity: 0;
-        }
-      }
+    .lq-table-checkbox {
+      background-color: #f9fafc;
     }
   }
 
@@ -362,7 +385,7 @@ export default {
     padding: 0 16px;
     display: flex;
     align-items: center;
-    background-color: #fff;
+    background-color: #f9fafc;
   }
 
   .can-sort {
@@ -392,24 +415,32 @@ export default {
     line-height: 20px;
     color: #7b7e8c;
     border-bottom: 1px solid #f2f4f9;
-    height: 60px;
 
-    &.if-checked,
     &:hover {
-      .lq-table-checkbox {
-        background: #f9fafe;
+      background-color: #f9f9f9;
 
-        .ivu-checkbox-wrapper {
-          opacity: 1;
-        }
+      .lq-table-checkbox {
+        background-color: #f9f9f9;
       }
 
       .data-cell-item {
-        background: #f9fafe;
+        background-color: #f9f9f9;
       }
 
       .drag-item {
         opacity: 1;
+      }
+    }
+
+    &.if-selected {
+      background-color: #f7f8ff;
+
+      .lq-table-checkbox {
+        background-color: #f7f8ff;
+      }
+
+      .data-cell-item {
+        background-color: #f7f8ff;
       }
     }
 
@@ -438,14 +469,6 @@ export default {
     align-items: center;
     justify-content: center;
     background-color: #fff;
-
-    .ivu-checkbox-wrapper {
-      opacity: 0;
-    }
-  }
-
-  .if-show {
-    opacity: 1;
   }
 
   .lq-table-footer {
@@ -500,6 +523,18 @@ export default {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+}
+
+.lq-table-content-tip {
+  .copy-icon {
+    cursor: pointer;
+    font-size: 12px;
+    margin-left: 8px;
+
+    &:hover {
+      opacity: 0.7;
+    }
   }
 }
 </style>
