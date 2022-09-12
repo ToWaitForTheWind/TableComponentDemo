@@ -22,6 +22,6 @@
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "window.zoomLevel": 0,
+  "window.zoomLevel": 1,
   "editor.tabSize": 2
 }
