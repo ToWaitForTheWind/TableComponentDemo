@@ -15,7 +15,7 @@ const UserOperate = () => import('@/views/userManage/UserOperate')
 const LoopholeList = () => import('@/views/loophole/LoopholeList')
 const DepartmentList = () => import('@/views/department/DepartmentList')
 const NoAuth = () => import('@/views/common/NoAuth')
-const test1 = () => import('@/views/forTest/TestHtml2Canvas')
+const test1 = () => import('@/views/forTest/test1')
 const Regexp = () => import('@/views/Regexp')
 
 Vue.use(Router)

@@ -1,20 +1,15 @@
 <template>
   <div class="test">
-    <LuckyTableBetter></LuckyTableBetter>
     <el-button @click="toOpenMessage">open</el-button>
-    <el-button @click="toCloseMessage">close</el-button>
   </div>
 </template>
 
 <script>
-import LuckyTableBetter from '@/luckyUI/components/LuckyTableBetter'
+import showDemoDialog from '@/components/plugin/demo.js'
 export default {
-  components: { LuckyTableBetter },
   props: {},
   data() {
-    return {
-      message: null
-    }
+    return {}
   },
   computed: {},
   watch: {},
@@ -22,15 +17,9 @@ export default {
   mounted() {},
   methods: {
     toOpenMessage() {
-      this.message = this.$message({
-        message: '这是一条消息提示',
-        duration: 0
-      })
+      showDemoDialog()
     },
-    toCloseMessage() {
-      this.message.close()
-    }
-  }
+  },
 }
 </script>
 
